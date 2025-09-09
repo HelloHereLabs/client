@@ -1,0 +1,20 @@
+@layer theme, base, mui, components, utilities;
+@import 'tailwindcss';
+
+/* tailwind variables */
+@theme {
+  --color-hh-main: #ffa100;
+  --color-hh-point: #ff6f61;
+  --color-hh-secondary: #59af93;
+  --color-hh-primary: #ffbb0f;
+  --color-hh-color1: #ffa100;
+  --color-hh-color2: #cdcdcd;
+  --color-hh-color3: #a9a9a9;
+  --color-hh-color4: #ffffff;
+  --color-hh-color5: #000000;
+  --color-hh-color6: #ffbb0fcc;
+  --color-hh-color7: #ffbb0f;
+  --color-hh-color8: #59af93cc;
+  --color-hh-color9: #e6efec;
+  /* ... */
+}

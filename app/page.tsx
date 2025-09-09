@@ -1,10 +1,10 @@
-import styles from './page.module.css'
-
 const MainPage = () => {
   return (
-    <div className={'styles.page'}>
-      <main className={'styles.main'}>main</main>
-      <footer className={'styles.footer'}>footer</footer>
+    <div className={''}>
+      <main className={'text-3xl text-hh-orange font-bold underline'}>
+        main
+      </main>
+      <footer className={'text-hh-green'}>footer</footer>
     </div>
   )
 }
