@@ -1,7 +1,9 @@
 const MainPage = () => {
   return (
     <div className={''}>
-      <main className={'text-3xl text-hh-point font-bold underline'}>main</main>
+      <main className={'text-base text-hh-point font-bold underline'}>
+        main
+      </main>
       <footer className={'text-hh-main'}>footer</footer>
     </div>
   )

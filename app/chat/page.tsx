@@ -1,15 +1,14 @@
-import Box from '@mui/material/Box'
+import ChatContainer from './components/ChatContainer'
 
-const MainPage = () => {
+const Chat = () => {
   return (
     <div className={''}>
-      <Box className={'text-3xl text-hh-color2 font-bold underline'}>asd</Box>
-      <main className={'text-3xl text-hh-color2 font-bold underline'}>
-        main
+      <main className={''}>
+        <ChatContainer />
       </main>
       <footer className={'text-hh-main'}>footer</footer>
     </div>
   )
 }
 
-export default MainPage
+export default Chat
