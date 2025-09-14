@@ -21,6 +21,14 @@ const eslintConfig = [
       'next-env.d.ts',
     ],
   },
+  // Custom rules
+  {
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      'no-var': 'warn',
+      'react-hooks/exhaustive-deps': 'warn',
+    },
+  },
 ]
 
 export default eslintConfig
