@@ -8,7 +8,7 @@ const axiosInstance = axios.create({
     // 'Authorization': 'Bearer <token>', // 인증 토큰 예시
   },
   // params: { lang: 'ko' }, // 모든 요청에 기본 쿼리 파라미터
-  // withCredentials: false, // 쿠키 등 인증정보 포함 여부
+  withCredentials: true, // 쿠키 등 인증정보 포함 여부
   // auth: { username: 'user', password: 'pass' }, // HTTP 기본 인증
   // responseType: 'json', // 응답 데이터 타입
   // xsrfCookieName: 'XSRF-TOKEN', // XSRF 보호용 쿠키 이름
