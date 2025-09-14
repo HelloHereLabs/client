@@ -50,6 +50,7 @@ const AppNavigation = () => {
       >
         {NAVIGATION_MENU_ARRAY.map((item, idx) => (
           <BottomNavigationAction
+            className="min-w-0"
             key={idx}
             value={item.value}
             icon={item.icon}
