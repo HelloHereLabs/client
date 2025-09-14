@@ -1,4 +1,4 @@
-import ChatContainer from './components/ChatContainer'
+import ChatContainer from './_components/ChatContainer'
 
 const Chat = () => {
   return (
