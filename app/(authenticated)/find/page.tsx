@@ -1,4 +1,4 @@
-import FindContainer from './components/FindContainer'
+import FindContainer from './_components/FindContainer'
 
 const FindPage = () => <FindContainer />
 
