@@ -5,7 +5,7 @@ import Button from '@mui/material/Button'
 
 const FindContainer = () => {
   return (
-    <Container className="h-full">
+    <Container disableGutters className="h-full">
       <Grid container spacing={2} className="h-full">
         <Grid size={6}>
           <Paper elevation={3}>
