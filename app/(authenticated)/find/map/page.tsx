@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react'
 import Box from '@mui/material/Box'
-import { useKakaoMap } from './hooks/useKaKaoMap'
-import { useClientLocation } from './hooks/useClientLocation'
+import { useKakaoMap } from './_hooks/useKaKaoMap'
+import { useClientLocation } from './_hooks/useClientLocation'
 
 const MapPage = () => {
   const map = useKakaoMap()
@@ -49,15 +49,8 @@ const MapPage = () => {
   }, [result])
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-      }}
-    >
-      <Box id="map" sx={{ width: '50vw', height: '30vh' }}></Box>
+    <Box className={'flex justify-center items-center h-dvh w-full'}>
+      <Box id="map" className={'w-full h-full'}></Box>
     </Box>
   )
 }
