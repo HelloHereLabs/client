@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import BottomNavigation from '@mui/material/BottomNavigation'
 import BottomNavigationAction from '@mui/material/BottomNavigationAction'
@@ -19,16 +19,24 @@ const NAVIGATION_MENU_ARRAY = [
   { label: 'Exit', icon: <ExitToAppIcon />, value: '/exit' },
 ]
 
+const getMatchedNavValue = (pathname: string) => {
+  const match = NAVIGATION_MENU_ARRAY.find((item) =>
+    pathname.startsWith(item.value),
+  )
+  return match ? match.value : pathname
+}
+
 const AppNavigation = () => {
   const router = useRouter()
   const pathname = usePathname()
   const [location, setLocation] = useState(pathname)
 
+  useEffect(() => {
+    setLocation(getMatchedNavValue(pathname))
+  }, [pathname])
+
   return (
-    <Paper
-      elevation={3}
-      className="app-navigation fixed bottom-0 left-0 right-0"
-    >
+    <Paper elevation={3} className="app-navigation flex-none">
       <BottomNavigation
         value={location}
         onChange={(event, newValue) => {
@@ -42,6 +50,7 @@ const AppNavigation = () => {
       >
         {NAVIGATION_MENU_ARRAY.map((item, idx) => (
           <BottomNavigationAction
+            className="min-w-0"
             key={idx}
             value={item.value}
             icon={item.icon}
