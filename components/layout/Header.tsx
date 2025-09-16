@@ -9,6 +9,9 @@ const Header = () => {
     try {
       const response = await axiosInstance.post('/api/auth/start')
       console.log(response.data)
+      if (response.data.token) {
+        localStorage.setItem('access-token', response.data.token)
+      }
     } catch (error) {
       console.error(error)
     }
