@@ -44,7 +44,12 @@ export const createWSClient = (baseUrl: string, opts: WSOptions = {}) => {
 
     ws.onerror = (event) => handler.error?.(event)
 
-    ws.onclose = () => {
+    ws.onclose = (e) => {
+      // console.log('WS close', {
+      //   code: e.code,
+      //   reason: e.reason,
+      //   wasClean: e.wasClean,
+      // })
       if (connectTimer) window.clearTimeout(connectTimer)
       handler.close?.()
       if (!closedByUser && reconnection && attempts < reconnectionAttempts) {
