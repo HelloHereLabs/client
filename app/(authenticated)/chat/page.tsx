@@ -1,10 +1,10 @@
-import ChatContainer from './_components/ChatContainer'
+import ContainerBox from './components/ContainerBox'
 
-const Chat = () => {
+const Chat = async () => {
   return (
     <div className={''}>
       <main className={''}>
-        <ChatContainer />
+        <ContainerBox />
       </main>
       <footer className={'text-hh-main'}>footer</footer>
     </div>
