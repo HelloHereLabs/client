@@ -13,13 +13,10 @@ export const createWSClient = (baseUrl: string, opts: WSOptions = {}) => {
   let closedByUser = false
   let connectTimer: number | undefined
 
-  const connect = (handler: WSHandlers = {}) => {
+  const connect = (handler: WSHandlers = {}, wsToken: string) => {
     closedByUser = false
 
-    const TOKEN =
-      typeof window !== 'undefined' ? localStorage.getItem('token') : ''
-
-    ws = new WebSocket(`${baseUrl}?token=${encodeURIComponent(TOKEN || '')}`)
+    ws = new WebSocket(`${baseUrl}?token=${encodeURIComponent(wsToken)}`)
 
     // 연결 타임아웃
     connectTimer = window.setTimeout(() => {
@@ -55,7 +52,7 @@ export const createWSClient = (baseUrl: string, opts: WSOptions = {}) => {
       if (!closedByUser && reconnection && attempts < reconnectionAttempts) {
         attempts++
         ws = undefined
-        setTimeout(() => connect(handler), reconnectionDelay)
+        setTimeout(() => connect(handler, wsToken), reconnectionDelay)
       }
     }
   }
