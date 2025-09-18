@@ -5,7 +5,7 @@ import TextField from '@mui/material/TextField'
 
 const ChatInput = () => {
   return (
-    <div className="flex justify-between w-full h-14 p-2 pl-3 bg-hh-white absolute bottom-0 ">
+    <div className="flex justify-between w-full h-14 p-2 pl-3 bg-hh-color4 absolute bottom-0 ">
       <div className="flex justify-center items-center rounded-full w-9 h-9 bg-hh-secondary text-hh-white">
         <MicIcon />
       </div>

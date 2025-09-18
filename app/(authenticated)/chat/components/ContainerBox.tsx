@@ -7,10 +7,12 @@ import axiosInstance from '@/lib/axiosInstance'
 import { ChatRoom } from '@/types/WSClient'
 import ChatContainer from '../_components/ChatContainer'
 import NoChat from '../_components/NoChat'
+import axios from 'axios'
+import { BASE_URL } from '@/lib/config'
 
 const ContainerBox = () => {
   const [wsToken, setWsToken] = useState<string | null>(null)
-  const [chatRooms, setChatRooms] = useState<ChatRoom[] | null>(null)
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([])
 
   const handleTokenRequest = async () => {
     try {
@@ -44,18 +46,29 @@ const ContainerBox = () => {
   }
 
   const getRooms = async () => {
+    // try {
+    //   const res = await axios.get(`${BASE_URL}/rooms`, {
+    //     withCredentials: true,
+    //   })
+    //   setChatRooms(res.data)
+    // } catch {
+    //   console.error('❌ fail to get rooms')
+    // }
     try {
-      const res = await axiosInstance.get('/rooms', { withCredentials: true })
+      const res = await axios.get('/api/chat/chatlist')
       setChatRooms(res.data)
     } catch {
-      console.error('❌ fail to get rooms')
+      console.error('fail to get List')
     }
   }
 
   useEffect(() => {
     getWsToken()
-    getRooms()
   }, [])
+
+  useEffect(() => {
+    getRooms()
+  }, [wsToken])
 
   useEffect(() => {
     if (!wsToken) return
@@ -72,8 +85,12 @@ const ContainerBox = () => {
   }, [wsToken])
 
   return (
-    <Container className="h-full flex justify-center">
-      {chatRooms ? <ChatContainer /> : <NoChat />}
+    <Container className="h-full w-full p-0 flex justify-center">
+      {chatRooms.length > 0 ? (
+        <ChatContainer chatRooms={chatRooms} />
+      ) : (
+        <NoChat />
+      )}
     </Container>
   )
 }

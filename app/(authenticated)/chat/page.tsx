@@ -6,7 +6,6 @@ const Chat = async () => {
       <main className={''}>
         <ContainerBox />
       </main>
-      <footer className={'text-hh-main'}>footer</footer>
     </div>
   )
 }

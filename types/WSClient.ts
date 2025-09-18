@@ -16,10 +16,9 @@ export interface WSHandlers {
 
 export interface ChatRoom {
   id: string
-  participants: string[]
-  title?: string
-  createdBy: string
-  createdAt: number
+  participants: { sender: string; reciever: string }
+  lastMessage?: string
+  updateAt: number
   lastActivity: number
 }
 
