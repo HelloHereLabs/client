@@ -1,0 +1,368 @@
+'use client'
+
+import queryClient from '@/lib/reactQueryClient'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
+import T from '@mui/material/Typography'
+import { QueryClientProvider, useMutation } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
+
+type UserData = {
+  language: string
+  interests: string[]
+  purpose: string
+}
+
+type StartBoxProps = {
+  setter: () => void
+}
+
+type LanguageBoxProps = {
+  setter: () => void
+  onLanguageSelect: (language: string) => void
+}
+
+type InterestsBoxProps = {
+  setter: () => void
+  onInterestsSelect: (interests: string[]) => void
+}
+
+type PurposeBoxProps = {
+  setter: () => void
+  onPurposeSelect: (purpose: string) => void
+}
+
+const StartBox = ({ setter }: StartBoxProps) => {
+  const startMutation = useMutation({
+    mutationFn: async () => {
+      // 시작하기 API 호출 로직 (예: 사용자 세션 초기화 등)
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve('success')
+        }, 1000)
+      })
+    },
+    onSuccess: () => {
+      setter()
+    },
+    onError: (error) => {
+      console.error('Start process failed:', error)
+    },
+  })
+
+  const handleStart = () => {
+    startMutation.mutate()
+  }
+
+  return (
+    <Box className="w-full h-full flex flex-col justify-end items-center">
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleStart}
+        disabled={startMutation.isPending}
+        className="w-[90%] h-13 bg-hh-primary/80 mb-10"
+      >
+        {startMutation.isPending ? 'Loading...' : 'Get Started'}
+      </Button>
+    </Box>
+  )
+}
+
+const LANGUAGES = [
+  'English',
+  'Korean',
+  'Japanese',
+  'Chinese',
+  'Spanish',
+  'French',
+  'German',
+  'Italian',
+  'Russian',
+  'Portuguese',
+  'Arabic',
+  'Hindi',
+  'Vietnamese',
+  'Thai',
+  'Indonesian',
+  'Turkish',
+]
+
+const LanguageBox = ({ setter, onLanguageSelect }: LanguageBoxProps) => {
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedLanguage, setSelectedLanguage] = useState('')
+  const [filteredLanguages, setFilteredLanguages] = useState(LANGUAGES)
+
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      const filtered = LANGUAGES.filter((lang) =>
+        lang.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+      setFilteredLanguages(filtered)
+    }, 300)
+
+    return () => clearTimeout(debounceTimer)
+  }, [searchTerm])
+
+  const handleLanguageSelect = (language: string) => {
+    setSelectedLanguage(language)
+    onLanguageSelect(language)
+  }
+
+  const handleNext = () => {
+    if (selectedLanguage) {
+      setter()
+    }
+  }
+
+  return (
+    <Box className="w-full h-full bg-hh-color4/60 rounded-3xl flex flex-col justify-between items-center">
+      <T className="font-bold text-lg italic p-5">Choice your language</T>
+
+      <Box className="w-full px-6">
+        <TextField
+          placeholder="Search language..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full bg-hh-color4/90 rounded-lg"
+          size="small"
+        />
+      </Box>
+
+      <Box className="w-full flex-1 px-6 py-3 overflow-y-auto">
+        {filteredLanguages.map((language) => (
+          <Box
+            key={language}
+            onClick={() => handleLanguageSelect(language)}
+            className={`p-3 mb-2 rounded-lg cursor-pointer bg-hh-color4 text-hh-primary border-2 box-border ${
+              selectedLanguage === language
+                ? 'border-hh-primary shadow-inner'
+                : 'border-transparent'
+            }`}
+          >
+            <T className="font-bold italic">{language}</T>
+          </Box>
+        ))}
+      </Box>
+
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleNext}
+        disabled={!selectedLanguage}
+        className="w-[90%] h-13 bg-hh-primary/80 mb-10"
+      >
+        Next
+      </Button>
+    </Box>
+  )
+}
+
+const INTERESTS = [
+  'K-POP',
+  'K-DRAMA',
+  'K-FOOD',
+  'HISTORY',
+  'HANBOK',
+  'TAEKWONDO',
+  'K-BEAUTY',
+  'LANGUAGE',
+]
+const InterestsBox = ({ setter, onInterestsSelect }: InterestsBoxProps) => {
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([])
+
+  const handleInterestSelect = (interest: string) => {
+    const newSelectedInterests = selectedInterests.includes(interest)
+      ? selectedInterests.filter((item) => item !== interest)
+      : [...selectedInterests, interest]
+
+    setSelectedInterests(newSelectedInterests)
+    onInterestsSelect(newSelectedInterests)
+  }
+
+  const handleNext = () => {
+    if (selectedInterests.length > 0) {
+      setter()
+    }
+  }
+
+  return (
+    <Box className="w-full h-full bg-hh-color4/60 rounded-3xl flex flex-col justify-between items-center">
+      <T className="font-bold text-lg italic p-5">Select Your Interests</T>
+      <Box className="interestBox w-full flex-1 grid grid-cols-2 gap-3 p-6 pt-0">
+        {INTERESTS.map((interest, idx) => {
+          const colorClass = [0, 3, 4, 7].includes(idx % 8)
+            ? 'text-hh-primary'
+            : 'text-hh-secondary'
+          const isSelected = selectedInterests.includes(interest)
+          return (
+            <Box
+              key={interest}
+              onClick={() => handleInterestSelect(interest)}
+              className={`${colorClass} interestBoxItem rounded-xl flex items-center justify-center bg-hh-color4 cursor-pointer border-2 box-border ${
+                isSelected
+                  ? 'border-hh-primary shadow-inner'
+                  : 'border-transparent'
+              }`}
+            >
+              <T className="font-bold italic">{interest}</T>
+            </Box>
+          )
+        })}
+      </Box>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleNext}
+        disabled={selectedInterests.length === 0}
+        className="w-[90%] h-13 bg-hh-primary/80 mb-10"
+      >
+        Next
+      </Button>
+    </Box>
+  )
+}
+
+const PURPOSES = [
+  'Language Exchange',
+  'Travel Companion',
+  'Professional Networking',
+  'Cultural Learning',
+  'Friendship',
+  'Study Partner',
+  'Business Collaboration',
+  'Hobby Sharing',
+]
+
+const PurposeBox = ({ setter, onPurposeSelect }: PurposeBoxProps) => {
+  const [selectedPurpose, setSelectedPurpose] = useState('')
+
+  const handlePurposeSelect = (purpose: string) => {
+    setSelectedPurpose(purpose)
+    onPurposeSelect(purpose)
+  }
+
+  const handleNext = () => {
+    if (selectedPurpose) {
+      setter()
+    }
+  }
+
+  return (
+    <Box className="w-full h-full bg-hh-color4/60 rounded-3xl flex flex-col justify-between items-center">
+      <T className="font-bold text-lg italic p-5">Select Your Purpose</T>
+
+      <Box className="w-full flex-1 px-6 py-3 overflow-y-auto">
+        <Box className="grid grid-cols-2 gap-3">
+          {PURPOSES.map((purpose, idx) => {
+            const colorClass = [0, 3, 4, 7].includes(idx % 8)
+              ? 'text-hh-primary'
+              : 'text-hh-secondary'
+            const isSelected = selectedPurpose === purpose
+            return (
+              <Box
+                key={purpose}
+                onClick={() => handlePurposeSelect(purpose)}
+                className={`${colorClass} purposeBoxItem rounded-xl flex items-center justify-center bg-hh-color4 cursor-pointer border-2 box-border min-h-16 p-3 ${
+                  isSelected
+                    ? 'border-hh-primary shadow-inner'
+                    : 'border-transparent'
+                }`}
+              >
+                <T className="font-bold italic text-center">{purpose}</T>
+              </Box>
+            )
+          })}
+        </Box>
+      </Box>
+
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleNext}
+        disabled={!selectedPurpose}
+        className="w-[90%] h-13 bg-hh-primary/80 mb-10"
+      >
+        Next
+      </Button>
+    </Box>
+  )
+}
+
+const FADE_DURATION = 300
+
+const RegisterContainer = () => {
+  const [step, setStep] = useState('start')
+  const [fade, setFade] = useState<'in' | 'out'>('in')
+  const [userData, setUserData] = useState<UserData>({
+    language: '',
+    interests: [],
+    purpose: '',
+  })
+
+  const handleNext = (target: string) => {
+    setFade('out')
+    setTimeout(() => {
+      setStep(target)
+      setFade('in')
+    }, FADE_DURATION)
+  }
+
+  const handleLanguageSelect = (language: string) => {
+    setUserData((prev) => ({ ...prev, language }))
+  }
+
+  const handleInterestsSelect = (interests: string[]) => {
+    setUserData((prev) => ({ ...prev, interests }))
+  }
+
+  const handlePurposeSelect = (purpose: string) => {
+    setUserData((prev) => ({ ...prev, purpose }))
+  }
+
+  let content
+  switch (step) {
+    case 'start':
+      content = <StartBox setter={() => handleNext('language')} />
+      break
+    case 'language':
+      content = (
+        <LanguageBox
+          setter={() => handleNext('interests')}
+          onLanguageSelect={handleLanguageSelect}
+        />
+      )
+      break
+    case 'interests':
+      content = (
+        <InterestsBox
+          setter={() => handleNext('purpose')}
+          onInterestsSelect={handleInterestsSelect}
+        />
+      )
+      break
+    case 'purpose':
+      content = (
+        <PurposeBox
+          setter={() => handleNext('complete')}
+          onPurposeSelect={handlePurposeSelect}
+        />
+      )
+      break
+    default:
+      content = <StartBox setter={() => handleNext('language')} />
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Box
+        className={`h-[72%] w-[90%] mt-6 rounded-3xl p-3 transition-opacity duration-300 ${fade === 'in' ? 'opacity-100' : 'opacity-0'}`}
+      >
+        {content}
+      </Box>
+    </QueryClientProvider>
+  )
+}
+
+export default RegisterContainer

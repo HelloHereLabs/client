@@ -1,6 +1,18 @@
 @layer theme, base, mui, components, utilities;
 @import 'tailwindcss';
 
+/* 스크롤바 숨김 */
+@layer base {
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+}
+
 /* tailwind variables */
 @theme {
   --color-hh-main: #ffa100;
