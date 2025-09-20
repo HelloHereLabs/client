@@ -1,5 +1,7 @@
 'use client'
 
+import { OnboardingBox } from '@/components/common/onboarding/OnboardingBox'
+import axiosInstance from '@/lib/axiosInstance'
 import queryClient from '@/lib/reactQueryClient'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -8,10 +10,33 @@ import T from '@mui/material/Typography'
 import { QueryClientProvider, useMutation } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
-type UserData = {
+export type UserData = {
   language: string
   interests: string[]
   purpose: string
+}
+
+// API 응답 타입 정의
+export type Location = {
+  latitude: number
+  longitude: number
+}
+
+export type User = {
+  userId: string
+  language: string
+  interests: string[]
+  purpose: string
+  location: Location
+  isActive: boolean
+  createdAt: number
+  updatedAt: number
+}
+
+export type AuthStartResponse = {
+  message: string
+  user: User
+  expiresAt: number
 }
 
 type StartBoxProps = {
@@ -31,23 +56,25 @@ type InterestsBoxProps = {
 type PurposeBoxProps = {
   setter: () => void
   onPurposeSelect: (purpose: string) => void
+  userData: UserData | null
 }
 
 const StartBox = ({ setter }: StartBoxProps) => {
-  const startMutation = useMutation({
-    mutationFn: async () => {
-      // 시작하기 API 호출 로직 (예: 사용자 세션 초기화 등)
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve('success')
-        }, 1000)
-      })
+  const startMutation = useMutation<AuthStartResponse>({
+    mutationFn: async (): Promise<AuthStartResponse> => {
+      const { data } =
+        await axiosInstance.post<AuthStartResponse>('/api/auth/start')
+      if (data) {
+        localStorage.setItem('user-id', data.user.userId)
+      }
+      return data
     },
-    onSuccess: () => {
+    onSuccess: (data: AuthStartResponse) => {
+      console.log('Start success:', data.message)
       setter()
     },
     onError: (error) => {
-      console.error('Start process failed:', error)
+      alert(error)
     },
   })
 
@@ -235,7 +262,7 @@ const PURPOSES = [
   'Hobby Sharing',
 ]
 
-const PurposeBox = ({ setter, onPurposeSelect }: PurposeBoxProps) => {
+const PurposeBox = ({ setter, onPurposeSelect, userData }: PurposeBoxProps) => {
   const [selectedPurpose, setSelectedPurpose] = useState('')
 
   const handlePurposeSelect = (purpose: string) => {
@@ -245,9 +272,33 @@ const PurposeBox = ({ setter, onPurposeSelect }: PurposeBoxProps) => {
 
   const handleNext = () => {
     if (selectedPurpose) {
+      patchUserDataMutation.mutate({
+        ...userData,
+        purpose: selectedPurpose,
+      } as UserData)
       setter()
     }
   }
+
+  const patchUserDataMutation = useMutation({
+    mutationFn: async (userData: UserData) => {
+      const userId = localStorage.getItem('user-id')
+      const { data } = await axiosInstance.patch(
+        `/api/users/${userId}`,
+        userData,
+        {
+          withCredentials: false,
+        },
+      )
+      return data
+    },
+    onSuccess: (data) => {
+      console.log('User data saved:', data)
+    },
+    onError: (error) => {
+      console.error('Error saving user data:', error)
+    },
+  })
 
   return (
     <Box className="w-full h-full bg-hh-color4/60 rounded-3xl flex flex-col justify-between items-center">
@@ -347,7 +398,14 @@ const RegisterContainer = () => {
         <PurposeBox
           setter={() => handleNext('complete')}
           onPurposeSelect={handlePurposeSelect}
+          userData={userData}
         />
+      )
+      break
+    case 'complete':
+      content = (
+        // 온보딩 가이드 시작
+        <OnboardingBox />
       )
       break
     default:

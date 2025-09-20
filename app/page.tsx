@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import RegisterBox from './_components/RegisterBox'
-// import { OnboardingBox } from '@/components/common/onboarding/OnboardingBox'
 
 const MainPage = () => {
   return (
@@ -18,7 +17,6 @@ const MainPage = () => {
           alt="logo"
           className="w-[70%] aspect-auto"
         />
-        {/* <OnboardingBox /> */}
         <RegisterBox />
       </Box>
     </Container>
