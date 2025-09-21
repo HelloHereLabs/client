@@ -8,7 +8,33 @@ import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import T from '@mui/material/Typography'
 import { QueryClientProvider, useMutation } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+
+// 인증 상태 확인하는 훅 (httpOnly 쿠키 대응)
+const useAuthToken = () => {
+  const [hasToken, setHasToken] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        // 인증이 필요한 API 엔드포인트로 확인 (예: /api/auth/me)
+        const response = await axiosInstance.get('/api/auth/me', {
+          withCredentials: true, // 쿠키 포함
+        })
+        setHasToken(true)
+        console.log('✅ Authenticated user found:', response.data)
+      } catch {
+        setHasToken(false)
+        console.log('❌ No valid authentication found')
+      }
+    }
+
+    checkAuthStatus()
+  }, [])
+
+  return hasToken
+}
 
 export type UserData = {
   language: string
@@ -344,6 +370,8 @@ const PurposeBox = ({ setter, onPurposeSelect, userData }: PurposeBoxProps) => {
 const FADE_DURATION = 300
 
 const RegisterContainer = () => {
+  const router = useRouter()
+  const hasToken = useAuthToken()
   const [step, setStep] = useState('start')
   const [fade, setFade] = useState<'in' | 'out'>('in')
   const [userData, setUserData] = useState<UserData>({
@@ -351,6 +379,27 @@ const RegisterContainer = () => {
     interests: [],
     purpose: '',
   })
+
+  // 토큰이 있는 경우 온보딩으로 바로 이동
+  useEffect(() => {
+    if (hasToken === true) {
+      console.log('✅ Token found, skipping registration')
+      setStep('complete')
+    } else if (hasToken === false) {
+      console.log('❌ No token found, starting registration')
+    }
+  }, [hasToken])
+
+  // 토큰 확인 중일 때 로딩 표시
+  if (hasToken === null) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <Box className="h-[72%] w-[90%] mt-6 rounded-3xl p-3 flex items-center justify-center">
+          <T className="text-hh-primary italic">Checking authentication...</T>
+        </Box>
+      </QueryClientProvider>
+    )
+  }
 
   const handleNext = (target: string) => {
     setFade('out')
@@ -370,6 +419,11 @@ const RegisterContainer = () => {
 
   const handlePurposeSelect = (purpose: string) => {
     setUserData((prev) => ({ ...prev, purpose }))
+  }
+
+  const handleEnd = () => {
+    console.log('Onboarding complete. User data:', userData)
+    router.replace('/find')
   }
 
   let content
@@ -405,7 +459,7 @@ const RegisterContainer = () => {
     case 'complete':
       content = (
         // 온보딩 가이드 시작
-        <OnboardingBox />
+        <OnboardingBox handleEnd={handleEnd} />
       )
       break
     default:
