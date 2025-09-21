@@ -1,22 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import AccountBoxIcon from '@mui/icons-material/AccountBox'
+import ChatBubbleIcon from '@mui/icons-material/ChatBubble'
+import LocalActivityIcon from '@mui/icons-material/LocalActivity'
+import MapIcon from '@mui/icons-material/Map'
 import BottomNavigation from '@mui/material/BottomNavigation'
 import BottomNavigationAction from '@mui/material/BottomNavigationAction'
 import Paper from '@mui/material/Paper'
-import MapIcon from '@mui/icons-material/Map'
-import ChatBubbleIcon from '@mui/icons-material/ChatBubble'
-import LocalActivityIcon from '@mui/icons-material/LocalActivity'
-import AccountBoxIcon from '@mui/icons-material/AccountBox'
-import ExitToAppIcon from '@mui/icons-material/ExitToApp'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 const NAVIGATION_MENU_ARRAY = [
   { label: 'Find', icon: <MapIcon />, value: '/find' },
   { label: 'Chat', icon: <ChatBubbleIcon />, value: '/chat' },
   { label: 'Quest', icon: <LocalActivityIcon />, value: '/quest' },
   { label: 'My', icon: <AccountBoxIcon />, value: '/my' },
-  { label: 'Exit', icon: <ExitToAppIcon />, value: '/exit' },
+  // { label: 'Exit', icon: <ExitToAppIcon />, value: '/exit' },
 ]
 
 const getMatchedNavValue = (pathname: string) => {

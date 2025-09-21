@@ -1,7 +1,7 @@
 import Container from '@mui/material/Container'
 import Image from 'next/image'
-import LandingBg from '../../public/images/landingImg.png'
 import Logo from '../../public/images/HelloHere.png'
+import LandingBg from '../../public/images/landingImg.png'
 
 const Onboarding = () => {
   return (
@@ -11,7 +11,7 @@ const Onboarding = () => {
         alt="landing image"
         className="relative h-full w-full"
       />
-      <Container className="absolute top-0 left-0 h-screen w-full flex flex-col items-center ">
+      <Container className="absolute top-0 left-0 h-full w-full flex flex-col items-center ">
         <Image src={Logo} alt="logo" className="w-3xs h-20 mt-24" />
         <div className="bg-hh-color4/60 h-[72%] w-84 mt-6 rounded-3xl p-3 flex flex-col items-center gap-3">
           <span className="font-bold text-hh-primary">How to use:cards</span>

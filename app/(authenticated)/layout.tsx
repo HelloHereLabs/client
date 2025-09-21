@@ -1,8 +1,8 @@
-import Container from '@mui/material/Container'
 import AppNavigation from '@/components/layout/Navigation'
-import Header from '@/components/layout/Header'
+import Container from '@mui/material/Container'
 
 import { checkIsDesktop } from '@/lib/utils'
+import { WebSocketProvider } from './_contexts/WebSocketContext'
 
 const AuthenticatedLayout = async ({
   children,
@@ -16,8 +16,8 @@ const AuthenticatedLayout = async ({
       disableGutters
       className={`flex overflow-y-auto flex-col ${isDesktop ? 'h-full' : 'h-svh'}`}
     >
-      <Header />
-      {children}
+      {/* <Header /> */}
+      <WebSocketProvider>{children}</WebSocketProvider>
       <AppNavigation />
     </Container>
   )

@@ -1,5 +1,6 @@
-import type { Metadata } from 'next'
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter'
+import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 
 import { checkIsDesktop } from '@/lib/utils'
 
@@ -24,13 +25,18 @@ const RootLayout = async ({
 }>) => {
   const isDesktop = await checkIsDesktop()
 
+  // 사용자의 언어 감지
+  const headersList = await headers()
+  const acceptLanguage = headersList.get('accept-language') || 'ko'
+  const userLanguage = acceptLanguage.split(',')[0].split('-')[0] || 'ko'
+
   return (
-    <html lang="ko">
+    <html lang={userLanguage}>
       <body
         className={`w-full overflow-x-hidden ${
           isDesktop
             ? 'max-w-md h-[70vh] mx-auto shadow-xl fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
-            : 'min-h-svh'
+            : 'h-dvh'
         }`}
       >
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
