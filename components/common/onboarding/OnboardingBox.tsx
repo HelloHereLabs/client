@@ -72,7 +72,7 @@ const MissionsGuide = ({ onNext }: { onNext: () => void }) => {
 
 const FADE_DURATION = 300
 
-const OnboardingBox = () => {
+const OnboardingBox = ({ handleEnd }: { handleEnd: () => void }) => {
   const [step, setStep] = useState(0)
   const [fade, setFade] = useState<'in' | 'out'>('in')
 
@@ -86,16 +86,15 @@ const OnboardingBox = () => {
     } else {
       // 온보딩 완료 후 처리 (예: 메인 페이지로 이동)
       console.log('Onboarding completed!')
+      handleEnd()
     }
   }
-
-  const handleStart = () => {}
 
   const guides = [
     <FindGuide key="find" onNext={handleNext} />,
     <MapGuide key="map" onNext={handleNext} />,
     <ChatGuide key="chat" onNext={handleNext} />,
-    <MissionsGuide key="missions" onNext={handleStart} />,
+    <MissionsGuide key="missions" onNext={handleEnd} />,
   ]
 
   return (
