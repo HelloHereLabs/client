@@ -79,16 +79,40 @@ export const WebSocketProvider = ({
     }
   }
 
-  // 위치 결과 모니터링
+  // 30초마다 위치 정보를 WebSocket으로 전송
   useEffect(() => {
-    if (
-      isLocationTracking &&
-      locationResult.code === 'OK' &&
-      locationResult.data
-    ) {
-      console.log('📍 WebSocket location update:', locationResult.data)
+    if (!isLocationTracking || !socketRef.current) return
+
+    const sendLocationUpdate = () => {
+      if (
+        socketRef.current?.readyState === WebSocket.OPEN &&
+        locationResult.code === 'OK' &&
+        locationResult.data
+      ) {
+        const message = {
+          action: 'updateLocation',
+          data: {
+            latitude: locationResult.data.latitude,
+            longitude: locationResult.data.longitude,
+            updatedAt: new Date().toISOString(),
+          },
+        }
+
+        socketRef.current.send(JSON.stringify(message))
+        console.log('📍 Location update sent via WebSocket:', message.data)
+      }
     }
-  }, [locationResult, isLocationTracking])
+
+    // 즉시 한 번 전송
+    sendLocationUpdate()
+
+    // 30초마다 반복 전송
+    const intervalId = setInterval(sendLocationUpdate, 30000)
+
+    return () => {
+      clearInterval(intervalId)
+    }
+  }, [isLocationTracking, locationResult])
 
   useEffect(() => {
     connectWithToken()
