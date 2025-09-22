@@ -16,10 +16,9 @@ export interface WSHandlers {
 
 export interface ChatRoom {
   id: string
-  participants: string[]
-  title?: string
-  createdBy: string
-  createdAt: number
+  participants: { sender: string; receiver: string }
+  lastMessage?: string
+  updateAt: number
   lastActivity: number
 }
 
@@ -34,4 +33,9 @@ export interface ChatMessage {
   isSafe: boolean
   filteredMessage?: string
   timestamp: number
+}
+
+export interface ChatEvent<T = any> {
+  action: string
+  data?: T
 }

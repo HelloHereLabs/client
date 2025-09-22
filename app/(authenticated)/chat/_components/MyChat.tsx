@@ -1,13 +1,23 @@
-const MyChat = () => {
+import { ChatMessage } from '@/types/WSClient'
+import { timeFormat } from '../_hooks/useTimeFormat'
+
+interface MyChatProps {
+  chat: ChatMessage
+}
+
+const MyChat = ({ chat }: MyChatProps) => {
+  const { message, timestamp } = chat
   return (
     <div className="flex justify-end gap-3 items-end w-full pr-4 mt-4">
       <div className="flex flex-wrap justify-end w-3/4">
         <div className="flex flex-col justify-center h-auto w-full p-3 rounded-t-xl rounded-bl-xl bg-hh-primary text-hh-white">
-          <div className="font-extrabold">나</div>
-          <div className="">안녕하세요</div>
+          <div className="font-extrabold text-hh-color4">나</div>
+          <div className="text-hh-color4 break-words whitespace-pre-wrap">
+            {message}
+          </div>
         </div>
-        <div className="pr-1 mt-1 text-xs text-hh-color1 font-medium">
-          2025.09.10 05:01pm
+        <div className="pr-1 mt-1 text-xs text-hh-color3 font-medium">
+          {timeFormat(timestamp)}
         </div>
       </div>
     </div>

@@ -1,14 +1,7 @@
-import ContainerBox from './components/ContainerBox'
+import ContainerBox from './_components/ContainerBox'
 
 const Chat = async () => {
-  return (
-    <div className={''}>
-      <main className={''}>
-        <ContainerBox />
-      </main>
-      <footer className={'text-hh-main'}>footer</footer>
-    </div>
-  )
+  return <ContainerBox />
 }
 
 export default Chat
