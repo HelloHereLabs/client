@@ -1,28 +1,34 @@
-import { ChatRoom, ChatMessage } from '@/types/WSClient'
-import ChatRooms from './ChatRooms'
+import { useWebSocket } from '@/app/(authenticated)/_contexts/WebSocketContext'
 import { ChatStore } from '@/store/chatStore'
+import { ChatMessage, ChatRoom } from '@/types/WSClient'
 import useChatEvent from '../_hooks/useChatEvent'
+import ChatRooms from './ChatRooms'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import Button from '@mui/material/Button'
+import { useEffect, useMemo, useState } from 'react'
+import ChatInput from './ChatInput'
 import MyChat from './MyChat'
 import UrChat from './UrChat'
-import ChatInput from './ChatInput'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { socket } from '@/lib/socket'
-import Button from '@mui/material/Button'
 
 interface ChatRoomsProps {
   chatRooms?: ChatRoom[]
 }
 
 const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
-  const { wsToken, userId } = ChatStore()
-  // const myId = '1e03b943-a484-4c5d-89dc-f4ffa86a2f58'
+  const { onEvent, sendMessage } = useWebSocket()
 
   const { chatRoomId, setChatRoomId } = ChatStore()
-  const { chatMsgs, createChatRoom, getChatHistory, sendChatMsg, leaveRoom } =
-    useChatEvent()
+  const { chatMsgs, getChatHistory, sendChatMsg, leaveRoom } = useChatEvent()
   const [inputValue, setInputValue] = useState<string>('')
+
+  // localStorage에서 userId 가져오기
+  const getUserId = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('user-id')
+    }
+    return null
+  }
 
   const currentRoom = useMemo(
     () => chatRooms?.find((r) => r.id === chatRoomId),
@@ -35,21 +41,24 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
   )
 
   // 채팅 히스토리
-
   useEffect(() => {
+    const userId = getUserId()
     if (!chatRoomId || !userId) return
 
     getChatHistory(chatRoomId, userId)
 
-    socket.onEvent('newMsg', (msg) => {
+    const unsubscribe = onEvent('newMsg', (msg: any) => {
       const { chatroomId } = msg.data
       if (chatroomId !== chatRoomId) return
       getChatHistory(chatRoomId, userId)
     })
-  }, [chatRoomId, getChatHistory])
+
+    return unsubscribe
+  }, [chatRoomId, getChatHistory, onEvent])
 
   // 메세지 보내기
   const sendMsg = () => {
+    const userId = getUserId()
     if (!chatRoomId || !inputValue.trim() || !userId) return
     sendChatMsg(userId, chatRoomId, inputValue.trim())
     setInputValue('')
@@ -61,9 +70,9 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
     if (!ok) {
       alert('방 나가기를 다시 시도해주세요')
     }
-    socket.send({
+    sendMessage({
       action: 'getChatRooms',
-      data: { userId: wsToken },
+      data: { userId },
     })
 
     setChatRoomId('')
@@ -82,6 +91,7 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
           <Button
             className="text-hh-color4"
             onClick={() => {
+              const userId = getUserId()
               if (!userId) return
               leaveTheRoom(chatRoomId, userId)
             }}
@@ -131,7 +141,7 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
 
       {chatRoomId ? (
         <ChatInput
-          userId={userId}
+          userId={getUserId()}
           chatroomId={chatRoomId}
           inputValue={inputValue}
           setInputValue={setInputValue}

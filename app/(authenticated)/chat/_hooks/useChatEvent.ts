@@ -1,13 +1,27 @@
-import { socket } from '@/lib/socket'
+import { useWebSocket } from '@/app/(authenticated)/_contexts/WebSocketContext'
 import { ChatMessage } from '@/types/WSClient'
 import { useCallback, useState } from 'react'
 
 const useChatEvent = () => {
+  const { sendMessage, sendAndWait } = useWebSocket()
   const [chatMsgs, setChatMsgs] = useState<ChatMessage[] | null>(null)
+
+  const openChatRoom = useCallback(
+    (chatroomId: string, userId: string) => {
+      sendMessage({
+        action: 'openChatRoom',
+        data: {
+          chatroomId: `${chatroomId}`,
+          userId: `${userId}`,
+        },
+      })
+    },
+    [sendMessage],
+  )
 
   const createChatRoom = async () => {
     try {
-      const res = await socket.sendAndWait(
+      const res = await sendAndWait(
         {
           action: 'createRoom',
           data: { sender: ``, receiver: `` },
@@ -26,7 +40,7 @@ const useChatEvent = () => {
       if (!chatRoomId) return
 
       try {
-        const res = await socket.sendAndWait(
+        const res = await sendAndWait(
           {
             action: 'getChatHistory',
             data: {
@@ -46,7 +60,7 @@ const useChatEvent = () => {
         console.error('❌ 실패:', e)
       }
     },
-    [],
+    [sendAndWait, openChatRoom],
   )
 
   const sendChatMsg = (
@@ -55,7 +69,7 @@ const useChatEvent = () => {
     inputValue: string,
   ) => {
     if (inputValue === '') return
-    socket.send({
+    sendMessage({
       action: 'sendChatMsg',
       data: {
         sender: `${sender}`,
@@ -66,26 +80,16 @@ const useChatEvent = () => {
   }
 
   const leaveRoom = async (chatRoomId: string, userId: string) => {
-    const res = await socket.sendAndWait(
+    const res = await sendAndWait(
       {
         action: 'leaveChatRoom',
         data: { chatroomId: `${chatRoomId}`, userId: `${userId}` },
       },
-      (msg) =>
+      (msg: any) =>
         msg?.action === 'leaveRoomResponse' && msg?.data?.success === true,
       8000,
     )
     return res.data.success
-  }
-
-  const openChatRoom = (chatroomId: string, userId: string) => {
-    socket.send({
-      action: 'openChatRoom',
-      data: {
-        chatroomId: `${chatroomId}`,
-        userId: `${userId}`,
-      },
-    })
   }
 
   return {
