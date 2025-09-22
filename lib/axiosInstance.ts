@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const axiosInstance = axios.create({
-  baseURL: 'https://qm81q0oz8a.execute-api.us-west-1.amazonaws.com/dev', // 기본 API URL
+  baseURL: 'https://develop.d39gx5kr6gfiso.amplifyapp.com',
   timeout: 10000, // 요청 타임아웃 (ms)
   headers: {
     'Content-Type': 'application/json',
