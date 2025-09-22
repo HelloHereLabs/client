@@ -1,10 +1,6 @@
 import MicIcon from '@mui/icons-material/Mic'
 import SendIcon from '@mui/icons-material/Send'
-
 import TextField from '@mui/material/TextField'
-import { useEffect, useState } from 'react'
-import useChatEvent from '../_hooks/useChatEvent'
-import { socket } from '@/lib/socket'
 
 interface ChatInputProps {
   userId: string | null
