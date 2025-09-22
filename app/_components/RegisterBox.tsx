@@ -13,27 +13,14 @@ import { useEffect, useState } from 'react'
 
 // 인증 상태 확인하는 훅 (httpOnly 쿠키 대응)
 const useAuthToken = () => {
-  const [hasToken, setHasToken] = useState<boolean | null>(null)
+  const [hasId, setHasId] = useState<boolean | null>(null)
 
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        // 인증이 필요한 API 엔드포인트로 확인 (예: /api/auth/me)
-        const response = await axiosInstance.get('/api/auth/me', {
-          withCredentials: true, // 쿠키 포함
-        })
-        setHasToken(true)
-        console.log('✅ Authenticated user found:', response.data)
-      } catch {
-        setHasToken(false)
-        console.log('❌ No valid authentication found')
-      }
-    }
-
-    checkAuthStatus()
+    const userId = localStorage.getItem('user-id')
+    setHasId(!!userId)
   }, [])
 
-  return hasToken
+  return hasId
 }
 
 export type UserData = {
@@ -371,7 +358,7 @@ const FADE_DURATION = 300
 
 const RegisterContainer = () => {
   const router = useRouter()
-  const hasToken = useAuthToken()
+  const hasId = useAuthToken()
   const [step, setStep] = useState('start')
   const [fade, setFade] = useState<'in' | 'out'>('in')
   const [userData, setUserData] = useState<UserData>({
@@ -382,16 +369,16 @@ const RegisterContainer = () => {
 
   // 토큰이 있는 경우 온보딩으로 바로 이동
   useEffect(() => {
-    if (hasToken === true) {
+    if (hasId === true) {
       console.log('✅ Token found, skipping registration')
       setStep('complete')
-    } else if (hasToken === false) {
+    } else if (hasId === false) {
       console.log('❌ No token found, starting registration')
     }
-  }, [hasToken])
+  }, [hasId])
 
   // 토큰 확인 중일 때 로딩 표시
-  if (hasToken === null) {
+  if (hasId === null) {
     return (
       <QueryClientProvider client={queryClient}>
         <Box className="h-[72%] w-[90%] mt-6 rounded-3xl p-3 flex items-center justify-center">
