@@ -5,14 +5,14 @@ export async function GET() {
   const mock: ChatRoom[] = [
     {
       id: '1',
-      participants: { sender: 'Olivia', reciever: 'Lilly' },
+      participants: { sender: 'Olivia', receiver: 'Lilly' },
       lastMessage: 'Hello!',
       updateAt: 1758198000000,
       lastActivity: 0,
     },
     {
       id: '2',
-      participants: { sender: 'Anna', reciever: 'Lilly' },
+      participants: { sender: 'Anna', receiver: 'Lilly' },
       lastMessage: 'See you',
       updateAt: 1758198000000,
       lastActivity: 0,
