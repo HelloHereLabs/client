@@ -8,6 +8,7 @@ import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
 import T from '@mui/material/Typography'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { useLocation } from './LocationContext'
 
 const WebSocketContext = createContext<WebSocket | null>(null)
 
@@ -19,9 +20,12 @@ export const WebSocketProvider = ({
   const socketRef = useRef<WebSocket | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
+  const [isLocationTracking, setIsLocationTracking] = useState(false)
 
-  const WS_TOKEN_URL =
-    'https://qm81q0oz8a.execute-api.us-west-1.amazonaws.com/dev/api/auth/websocket-token'
+  // 위치 추적용 (Location Context에서 가져옴)
+  const { locationResult } = useLocation()
+
+  const WS_TOKEN_URL = '/api/auth/websocket-token'
   const WS_BASE_URL =
     'wss://eqgyhfgc4i.execute-api.us-west-1.amazonaws.com/dev/'
 
@@ -54,6 +58,8 @@ export const WebSocketProvider = ({
       console.log('✅ WebSocket connected')
       setIsLoading(false)
       setHasError(false)
+      setIsLocationTracking(true)
+      console.log('🌍 Location tracking started via WebSocket connection')
     }
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data)
@@ -73,12 +79,24 @@ export const WebSocketProvider = ({
     }
   }
 
+  // 위치 결과 모니터링
+  useEffect(() => {
+    if (
+      isLocationTracking &&
+      locationResult.code === 'OK' &&
+      locationResult.data
+    ) {
+      console.log('📍 WebSocket location update:', locationResult.data)
+    }
+  }, [locationResult, isLocationTracking])
+
   useEffect(() => {
     connectWithToken()
 
     return () => {
       socketRef.current?.close()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
