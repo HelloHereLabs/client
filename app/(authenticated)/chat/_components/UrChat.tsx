@@ -27,7 +27,9 @@ const UrChat = ({ chat }: UrChatProps) => {
       <div className="w-3/4">
         <div className="flex flex-col justify-center  h-auto p-3 rounded-t-xl rounded-br-xl bg-hh-color4">
           <div className="font-extrabold">{userId}</div>
-          <div className="">{message}</div>
+          <div className="text-hh-color4 break-words whitespace-pre-wrap">
+            {message}
+          </div>
           {isTranslated && (
             <>
               <div className="h-[2px] w-full my-1 bg-hh-primary"></div>

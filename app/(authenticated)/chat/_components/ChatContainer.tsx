@@ -2,23 +2,35 @@ import { ChatRoom, ChatMessage } from '@/types/WSClient'
 import ChatAlert from './ChatAlert'
 import ChatRooms from './ChatRooms'
 import PushToTalk from './PushToTalk'
-import { chattingStore } from '@/store/chatStore'
+import { ChatStore } from '@/store/chatStore'
+import useChatEvent from '../_hooks/useChatEvent'
 
-import { useEffect, useMemo, useState } from 'react'
-import axios from 'axios'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import MyChat from './MyChat'
 import UrChat from './UrChat'
 import ChatInput from './ChatInput'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import { socket } from '@/lib/socket'
+import Button from '@mui/material/Button'
 
 interface ChatRoomsProps {
   chatRooms?: ChatRoom[]
 }
 
 const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
-  const { chatRoomId, setChatRoomId } = chattingStore()
-  const [chatMsgs, setChatMsgs] = useState<ChatMessage[] | null>(null)
-  console.log(chatRoomId)
+  const { wsToken, setWsToken, userId } = ChatStore()
+  const myId = '1e03b943-a484-4c5d-89dc-f4ffa86a2f58'
+
+  const { chatRoomId, setChatRoomId } = ChatStore()
+  const {
+    chatMsgs,
+    createChatRoom,
+    getChatHistory,
+    sendChatMsg,
+    leaveRoom,
+    openChatRoom,
+  } = useChatEvent()
+  const [inputValue, setInputValue] = useState<string>('')
 
   const currentRoom = useMemo(
     () => chatRooms?.find((r) => r.id === chatRoomId),
@@ -26,32 +38,67 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
   )
 
   const theSender = useMemo(
-    () => currentRoom?.participants?.sender ?? null,
+    () => currentRoom?.participants?.receiver ?? null,
     [currentRoom],
   )
 
-  const getChatMsgs = async (chatRoomId: string) => {
-    const res = await axios.get(`api/chat/${chatRoomId}`)
-    setChatMsgs(res.data)
-  }
+  // 채팅 히스토리
 
   useEffect(() => {
     if (!chatRoomId) return
 
-    getChatMsgs(chatRoomId)
-  }, [chatRoomId])
+    getChatHistory(chatRoomId, myId)
+
+    socket.onEvent('newMsg', (msg) => {
+      const { chatroomId } = msg.data
+      if (chatroomId !== chatRoomId) return
+      getChatHistory(chatRoomId, myId)
+    })
+  }, [chatRoomId, getChatHistory])
+
+  // 메세지 보내기
+  const sendMsg = () => {
+    if (!chatRoomId || !inputValue.trim()) return
+    sendChatMsg(myId, chatRoomId, inputValue.trim())
+    setInputValue('')
+  }
+
+  // 채팅방 나가기
+  const leaveTheRoom = (chatRoomId: string, userId: string) => {
+    leaveRoom(chatRoomId, myId)
+    // socket.send({
+    //   action: 'getChatRooms',
+    //   data: { userId: wsToken },
+    // })
+
+    // setChatRoomId('')
+  }
 
   return (
-    <div className="h-screen w-full">
-      <div className="h-13 rounded-t-4xl pt-4 px-6 bg-hh-secondary text-hh-color4 font-bold flex items-base">
+    <div className="h-full w-full ">
+      <div className="flex justify-between items-center h-13 rounded-t-4xl pt-1 px-6 bg-hh-secondary text-hh-color4 font-bold ">
         {theSender ? (
           <ArrowBackIcon onClick={() => setChatRoomId('')} className="mr-1" />
         ) : (
           ''
         )}
         {theSender ? theSender : 'Chats'}
+        {chatRoomId ? (
+          <Button
+            className="text-hh-color4"
+            onClick={() => {
+              leaveTheRoom(chatRoomId, myId)
+            }}
+          >
+            나가기
+          </Button>
+        ) : (
+          ''
+        )}
       </div>
-      <div className="flex flex-wrap flex-col items-center h-full bg-hh-color9">
+      <div
+        className={`relative flex flex-wrap flex-col items-center pb-15 bg-hh-color9 overflow-y-auto overflow-x-hidden ${chatRoomId ? '' : 'h-full'} flex-1 min-h-0 `}
+      >
         {!chatRoomId
           ? chatRooms?.map((chatRoom: ChatRoom) => {
               const handleChatRoomClick = () => {
@@ -84,8 +131,19 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
                 />
               )
             })}
-        {chatRoomId ? <ChatInput /> : ''}
       </div>
+
+      {chatRoomId ? (
+        <ChatInput
+          myId={myId}
+          chatroomId={chatRoomId}
+          inputValue={inputValue}
+          setInputValue={setInputValue}
+          sendMsg={sendMsg}
+        />
+      ) : (
+        ''
+      )}
     </div>
   )
 }
