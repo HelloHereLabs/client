@@ -65,11 +65,17 @@ const useChatEvent = () => {
     })
   }
 
-  const leaveRoom = (chatRoomId: string, userId: string) => {
-    socket.send({
-      action: 'leaveRoom',
-      data: { chatroomId: `${chatRoomId}`, userId: `${userId}` },
-    })
+  const leaveRoom = async (chatRoomId: string, userId: string) => {
+    const res = await socket.sendAndWait(
+      {
+        action: 'leaveChatRoom',
+        data: { chatroomId: `${chatRoomId}`, userId: `${userId}` },
+      },
+      (msg) =>
+        msg?.action === 'leaveRoomResponse' && msg?.data?.success === true,
+      8000,
+    )
+    return res.data.success
   }
 
   const openChatRoom = (chatroomId: string, userId: string) => {

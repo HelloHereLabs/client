@@ -64,14 +64,17 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
   }
 
   // 채팅방 나가기
-  const leaveTheRoom = (chatRoomId: string, userId: string) => {
-    leaveRoom(chatRoomId, myId)
-    // socket.send({
-    //   action: 'getChatRooms',
-    //   data: { userId: wsToken },
-    // })
+  const leaveTheRoom = async (chatRoomId: string, userId: string) => {
+    const ok = await leaveRoom(chatRoomId, myId)
+    if (!ok) {
+      alert('방 나가기를 다시 시도해주세요')
+    }
+    socket.send({
+      action: 'getChatRooms',
+      data: { userId: wsToken },
+    })
 
-    // setChatRoomId('')
+    setChatRoomId('')
   }
 
   return (
