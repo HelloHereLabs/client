@@ -2,6 +2,7 @@ import AppNavigation from '@/components/layout/Navigation'
 import Container from '@mui/material/Container'
 
 import { checkIsDesktop } from '@/lib/utils'
+import { LocationProvider } from './_contexts/LocationContext'
 import { WebSocketProvider } from './_contexts/WebSocketContext'
 
 const AuthenticatedLayout = async ({
@@ -17,7 +18,9 @@ const AuthenticatedLayout = async ({
       className={`flex overflow-y-auto flex-col ${isDesktop ? 'h-full' : 'h-svh'}`}
     >
       {/* <Header /> */}
-      <WebSocketProvider>{children}</WebSocketProvider>
+      <LocationProvider>
+        <WebSocketProvider>{children}</WebSocketProvider>
+      </LocationProvider>
       <AppNavigation />
     </Container>
   )

@@ -43,7 +43,7 @@ const AppNavigation = () => {
           if (newValue === '/exit') {
             // 로그아웃 확인 모달 처리
           } else {
-            //   router.push(newValue)
+            router.push(newValue)
           }
         }}
       >

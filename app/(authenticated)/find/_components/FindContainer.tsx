@@ -6,11 +6,13 @@ import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import Grid from '@mui/material/Grid'
 import T from '@mui/material/Typography'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import FindButton from './FindButton'
 
 const FindContainer = () => {
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const router = useRouter()
 
   const handleOnboardingEnd = () => {
     setShowOnboarding(false)
@@ -27,6 +29,7 @@ const FindContainer = () => {
         </T>
       ),
       onClick: () => {},
+      disabled: true,
     },
     {
       id: 'onboarding',
@@ -48,7 +51,7 @@ const FindContainer = () => {
           <PlaceIcon className="text-hh-primary w-[36px] h-[56px]" />
         </Box>
       ),
-      onClick: () => {},
+      onClick: () => router.push('/find/map'),
     },
     {
       id: 'interests',
@@ -61,7 +64,7 @@ const FindContainer = () => {
           사용자 찾기
         </T>
       ),
-      onClick: () => {},
+      onClick: () => router.push('/find/map'),
     },
     {
       id: 'nearby',
@@ -73,7 +76,7 @@ const FindContainer = () => {
           사용자 찾기
         </T>
       ),
-      onClick: () => {},
+      onClick: () => router.push('/find/map'),
     },
   ]
 
@@ -87,6 +90,7 @@ const FindContainer = () => {
                 colorClassName={button.colorClassName}
                 content={button.content}
                 onClick={button.onClick}
+                disabled={button.disabled}
               />
             </Grid>
           ))}
