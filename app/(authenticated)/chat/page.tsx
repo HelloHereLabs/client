@@ -1,13 +1,7 @@
-import ContainerBox from './components/ContainerBox'
+import ContainerBox from './_components/ContainerBox'
 
 const Chat = async () => {
-  return (
-    <div className={''}>
-      <main className={''}>
-        <ContainerBox />
-      </main>
-    </div>
-  )
+  return <ContainerBox />
 }
 
 export default Chat
