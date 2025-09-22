@@ -9,11 +9,12 @@ interface ChatState {
   setChatRoomId: (v: string) => void
 }
 
-const testWs =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxZTAzYjk0My1hNDg0LTRjNWQtODlkYy1mNGZmYTg2YTJmNTgiLCJ0eXBlIjoid2Vic29ja2V0IiwiaWF0IjoxNzU4Mjg5MTc2LCJleHAiOjE3NTg1NDgzNzZ9.wAmABIhpBit9RvPMP0ppXWcikiMLDLxoaSlPZ2Q5doE'
+// const testWs =
+//   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxZTAzYjk0My1hNDg0LTRjNWQtODlkYy1mNGZmYTg2YTJmNTgiLCJ0eXBlIjoid2Vic29ja2V0IiwiaWF0IjoxNzU4Mjg5MTc2LCJleHAiOjE3NTg1NDgzNzZ9.wAmABIhpBit9RvPMP0ppXWcikiMLDLxoaSlPZ2Q5doE'
 
 export const ChatStore = create<ChatState>((set) => ({
-  wsToken: testWs,
+  // wsToken: testWs,
+  wsToken: null,
   setWsToken: (v) =>
     set(() => ({
       wsToken: v,

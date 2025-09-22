@@ -4,10 +4,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { socket } from '@/lib/socket'
 import axiosInstance from '@/lib/axiosInstance'
 import type { ChatRoom } from '@/types/WSClient'
-import { useStore } from 'zustand'
 import { ChatStore } from '@/store/chatStore'
-import axios from 'axios'
-import { BASE_URL } from './config'
+// import axios from 'axios'
+// import { BASE_URL } from './config'
 
 type UseChatWSOpts = {
   wsTokenUrl?: string
@@ -35,7 +34,10 @@ export const useChatWS = (opts: UseChatWSOpts = {}) => {
       )
       setUserId(token.data.user.userId)
 
-      const res = await axios.get(`${BASE_URL}auth/websocket-token`, {
+      // const res = await axios.get(`${BASE_URL}auth/websocket-token`, {
+      //   withCredentials: true,
+      // })
+      const res = await axiosInstance.get('api/auth/websocket-token', {
         withCredentials: true,
       })
 
@@ -43,7 +45,7 @@ export const useChatWS = (opts: UseChatWSOpts = {}) => {
 
       const wsToken = res.data.wsToken
       if (!wsToken) throw new Error('토큰 응답 없음')
-      // setWsToken(token)
+      setWsToken(wsToken)
       setError(null)
     } catch (e: any) {
       setError(e?.message ?? ' 실패')
