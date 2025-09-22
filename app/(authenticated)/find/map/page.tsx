@@ -4,60 +4,45 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
 import { useLocation } from '../../_contexts/LocationContext'
+import LocationPermissionModal from './_components/LocationPermissionModal'
 import { useKakaoMap } from './_hooks/useKaKaoMap'
+import { useLocationMarker } from './_hooks/useLocationMarker'
+import { usePermissionModal } from './_hooks/usePermissionModal'
 
+/**
+ * MapPage 컴포넌트
+ *
+ * 카카오맵을 사용하여 사용자의 현재 위치를 표시하는 지도 페이지
+ *
+ * 주요 기능:
+ * - 카카오맵 렌더링 및 초기화
+ * - 사용자 현재 위치 추적 및 마커 표시
+ * - 최초 위치 감지 시 지도 중심 이동 및 줌 레벨 조정
+ * - 위치 권한 거부 시 권한 요청 모달 표시
+ * - 마커 업데이트 및 메모리 관리
+ */
 const MapPage = () => {
   const router = useRouter()
-  const map = useKakaoMap()
-  const { locationResult } = useLocation()
+  const map = useKakaoMap() // 카카오맵 인스턴스
+  const { locationResult, requestPermission } = useLocation() // 위치 컨텍스트
+
+  // 위치 마커 관리 훅
+  useLocationMarker(map, locationResult)
+
+  // 권한 모달 관리 훅
+  const {
+    showPermissionModal,
+    handlePermissionSettings,
+    handlePermissionCancel,
+  } = usePermissionModal({
+    locationResult,
+    requestPermission,
+  })
 
   const handleBack = () => {
     router.back()
   }
-
-  // 지도 객체가 할당될 때만 지도 중심 이동
-  useEffect(() => {
-    if (map) {
-      console.log('Map instance:', map)
-      const moveLatLon = new window.kakao.maps.LatLng(33.452613, 126.570888)
-      map.setCenter(moveLatLon)
-    }
-  }, [map])
-
-  // 위치 정보가 변경될 때마다 결과 출력
-  useEffect(() => {
-    if (!map) return
-    console.log('Location result:', locationResult)
-    if (locationResult.code === 'OK' && locationResult.data) {
-      console.log(
-        `User location: Latitude ${locationResult.data.latitude}, Longitude ${locationResult.data.longitude}`,
-      )
-      //  현위치 마커 추가, 마커 이미지 커스텀
-      const myLocationMarker = new window.kakao.maps.Marker({
-        position: new window.kakao.maps.LatLng(
-          locationResult.data.latitude,
-          locationResult.data.longitude,
-        ),
-        image: new window.kakao.maps.MarkerImage(
-          '/icons/my-location-icon.svg',
-          new window.kakao.maps.Size(24, 28),
-          {
-            offset: new window.kakao.maps.Point(12, 28),
-          },
-        ),
-      })
-      myLocationMarker.setMap(map)
-      //   map.setLevel(2)
-    } else if (locationResult.code === 'denied') {
-      console.log('Location access denied by user.')
-    } else if (locationResult.code === 'not-supported') {
-      console.log('Geolocation is not supported by this browser.')
-    } else if (locationResult.code === 'error') {
-      console.log('An error occurred while retrieving location.')
-    }
-  }, [locationResult, map])
 
   return (
     <Box className="flex flex-col h-dvh w-full">
@@ -79,6 +64,13 @@ const MapPage = () => {
       <Box className="flex-1">
         <Box id="map" className="w-full h-full"></Box>
       </Box>
+
+      {/* 위치 권한 모달 */}
+      <LocationPermissionModal
+        open={showPermissionModal}
+        onRequestPermission={handlePermissionSettings}
+        onCancel={handlePermissionCancel}
+      />
     </Box>
   )
 }
