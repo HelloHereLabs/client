@@ -7,7 +7,7 @@ import useChatEvent from '../_hooks/useChatEvent'
 import { socket } from '@/lib/socket'
 
 interface ChatInputProps {
-  myId: string
+  userId: string | null
   chatroomId: string
   inputValue: string
   setInputValue: (v: string) => void

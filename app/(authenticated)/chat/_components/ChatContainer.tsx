@@ -1,7 +1,5 @@
 import { ChatRoom, ChatMessage } from '@/types/WSClient'
-import ChatAlert from './ChatAlert'
 import ChatRooms from './ChatRooms'
-import PushToTalk from './PushToTalk'
 import { ChatStore } from '@/store/chatStore'
 import useChatEvent from '../_hooks/useChatEvent'
 
@@ -18,18 +16,12 @@ interface ChatRoomsProps {
 }
 
 const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
-  const { wsToken, setWsToken, userId } = ChatStore()
-  const myId = '1e03b943-a484-4c5d-89dc-f4ffa86a2f58'
+  const { wsToken, userId } = ChatStore()
+  // const myId = '1e03b943-a484-4c5d-89dc-f4ffa86a2f58'
 
   const { chatRoomId, setChatRoomId } = ChatStore()
-  const {
-    chatMsgs,
-    createChatRoom,
-    getChatHistory,
-    sendChatMsg,
-    leaveRoom,
-    openChatRoom,
-  } = useChatEvent()
+  const { chatMsgs, createChatRoom, getChatHistory, sendChatMsg, leaveRoom } =
+    useChatEvent()
   const [inputValue, setInputValue] = useState<string>('')
 
   const currentRoom = useMemo(
@@ -45,27 +37,27 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
   // 채팅 히스토리
 
   useEffect(() => {
-    if (!chatRoomId) return
+    if (!chatRoomId || !userId) return
 
-    getChatHistory(chatRoomId, myId)
+    getChatHistory(chatRoomId, userId)
 
     socket.onEvent('newMsg', (msg) => {
       const { chatroomId } = msg.data
       if (chatroomId !== chatRoomId) return
-      getChatHistory(chatRoomId, myId)
+      getChatHistory(chatRoomId, userId)
     })
   }, [chatRoomId, getChatHistory])
 
   // 메세지 보내기
   const sendMsg = () => {
-    if (!chatRoomId || !inputValue.trim()) return
-    sendChatMsg(myId, chatRoomId, inputValue.trim())
+    if (!chatRoomId || !inputValue.trim() || !userId) return
+    sendChatMsg(userId, chatRoomId, inputValue.trim())
     setInputValue('')
   }
 
   // 채팅방 나가기
   const leaveTheRoom = async (chatRoomId: string, userId: string) => {
-    const ok = await leaveRoom(chatRoomId, myId)
+    const ok = await leaveRoom(chatRoomId, userId)
     if (!ok) {
       alert('방 나가기를 다시 시도해주세요')
     }
@@ -90,7 +82,8 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
           <Button
             className="text-hh-color4"
             onClick={() => {
-              leaveTheRoom(chatRoomId, myId)
+              if (!userId) return
+              leaveTheRoom(chatRoomId, userId)
             }}
           >
             나가기
@@ -138,7 +131,7 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
 
       {chatRoomId ? (
         <ChatInput
-          myId={myId}
+          userId={userId}
           chatroomId={chatRoomId}
           inputValue={inputValue}
           setInputValue={setInputValue}
