@@ -39,6 +39,7 @@ export const WebSocketProvider = ({
   children: React.ReactNode
 }) => {
   const socketRef = useRef<WebSocket | null>(null)
+  const socketPresenceRef = useRef<WebSocket | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
   const [isLocationTracking, setIsLocationTracking] = useState(false)
@@ -53,6 +54,8 @@ export const WebSocketProvider = ({
   const WS_TOKEN_URL = '/api/auth/websocket-token'
   const WS_BASE_URL =
     'wss://eqgyhfgc4i.execute-api.us-west-1.amazonaws.com/dev/'
+  const WS_PRESENCE_BASE_URL =
+    'wss://nehjc9e54g.execute-api.us-west-1.amazonaws.com/dev/'
 
   // 메시지 전송 함수
   const sendMessage = useCallback((message: any): boolean => {
@@ -151,10 +154,15 @@ export const WebSocketProvider = ({
       // 1. 웹소켓 토큰 요청
       const response = await axiosInstance.get(WS_TOKEN_URL)
 
-      // 2. 토큰과 함께 웹소켓 연결
+      // 2. 메인 소켓 연결
       const wsUrl = `${WS_BASE_URL}?token=${encodeURIComponent(response.data.token)}`
       socketRef.current = new WebSocket(wsUrl)
       setupSocketEvents(socketRef.current)
+
+      // 3. Presence 소켓 연결
+      const presenceWsUrl = `${WS_PRESENCE_BASE_URL}?token=${encodeURIComponent(response.data.token)}`
+      socketPresenceRef.current = new WebSocket(presenceWsUrl)
+      setupPresenceSocketEvents(socketPresenceRef.current)
     } catch (error) {
       console.error('Failed to get WebSocket token:', error)
       setIsLoading(false)
@@ -208,9 +216,41 @@ export const WebSocketProvider = ({
     }
   }
 
+  const setupPresenceSocketEvents = (socket: WebSocket) => {
+    socket.onopen = () => {
+      console.log('✅ Presence WebSocket connected')
+    }
+
+    socket.onmessage = (event) => {
+      let data: any = event.data
+      try {
+        data = JSON.parse(event.data)
+      } catch {
+        // JSON 파싱 실패 시 원본 데이터 사용
+      }
+
+      console.log('📨 Presence message received:', data)
+
+      // 이벤트 구독자들에게 메시지 전달 (presence 전용)
+      if (data?.action && subscribersRef.current[data.action]) {
+        subscribersRef.current[data.action].forEach((callback) => {
+          callback(data)
+        })
+      }
+    }
+
+    socket.onclose = () => {
+      console.log('❌ Presence WebSocket disconnected')
+    }
+
+    socket.onerror = () => {
+      console.log('🔥 Presence WebSocket error')
+    }
+  }
+
   // 위치 정보 업데이트 커스텀 훅 사용
   useLocationUpdater({
-    socketRef,
+    socketPresenceRef,
     isLocationTracking,
     locationResult,
   })
@@ -220,6 +260,7 @@ export const WebSocketProvider = ({
 
     return () => {
       socketRef.current?.close()
+      socketPresenceRef.current?.close()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
