@@ -5,9 +5,12 @@ import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import { useRouter } from 'next/navigation'
 import { useLocation } from '../../_contexts/LocationContext'
+import LocationLoadingSnackbar from './_components/LocationLoadingSnackbar'
 import LocationPermissionModal from './_components/LocationPermissionModal'
 import { useKakaoMap } from './_hooks/useKaKaoMap'
 import { useLocationMarker } from './_hooks/useLocationMarker'
+import { useNearbyUsers } from './_hooks/useNearbyUsers'
+import { useNearbyUsersMarkers } from './_hooks/useNearbyUsersMarkers'
 import { usePermissionModal } from './_hooks/usePermissionModal'
 
 /**
@@ -25,10 +28,34 @@ import { usePermissionModal } from './_hooks/usePermissionModal'
 const MapPage = () => {
   const router = useRouter()
   const map = useKakaoMap() // 카카오맵 인스턴스
-  const { locationResult, requestPermission } = useLocation() // 위치 컨텍스트
+  const { locationResult, requestPermission, isTracking } = useLocation() // 위치 컨텍스트
+
+  // 현재 위치에서 위도/경도 추출
+  const currentLatitude = locationResult?.data?.latitude
+  const currentLongitude = locationResult?.data?.longitude
+
+  // 위치 로딩 상태 판단
+  const isLocationLoading =
+    isTracking &&
+    (!locationResult?.data || locationResult?.code === '') &&
+    locationResult?.code !== 'permission-denied' &&
+    locationResult?.code !== 'not-supported'
+
+  // 근처 사용자 조회 훅
+  const { data: nearbyUsersData } = useNearbyUsers({
+    latitude: currentLatitude,
+    longitude: currentLongitude,
+    enabled: !!currentLatitude && !!currentLongitude, // 위치 정보가 있을 때만 활성화
+  })
 
   // 위치 마커 관리 훅
   useLocationMarker(map, locationResult)
+
+  // 근처 사용자 마커 관리 훅
+  useNearbyUsersMarkers({
+    map,
+    nearbyUsers: nearbyUsersData || [],
+  })
 
   // 권한 모달 관리 훅
   const {
@@ -46,6 +73,9 @@ const MapPage = () => {
 
   return (
     <Box className="flex flex-col h-dvh w-full">
+      {/* 위치 로딩 스낵바 */}
+      <LocationLoadingSnackbar isVisible={isLocationLoading} />
+
       {/* 헤더 */}
       <Box className="flex items-center px-4 py-3 bg-white border-b border-gray-200 shadow-sm">
         <IconButton
