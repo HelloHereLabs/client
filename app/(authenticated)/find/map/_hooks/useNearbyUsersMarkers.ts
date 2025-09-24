@@ -1,4 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useRef } from 'react'
+import {
+  cleanupGlobalChatHandler,
+  generateUserInfoContent,
+  setupGlobalChatHandler,
+} from '../_utils/infoWindowUtils'
 import { NearbyUser } from './useNearbyUsers'
 
 interface UseNearbyUsersMarkersParams {
@@ -24,8 +30,58 @@ export const useNearbyUsersMarkers = ({
   map,
   nearbyUsers,
 }: UseNearbyUsersMarkersParams) => {
+  const router = useRouter()
   // 현재 활성화된 마커들을 저장하는 ref
   const markersRef = useRef<Map<string, kakao.maps.Marker>>(new Map())
+  // 현재 열린 인포윈도우를 저장하는 ref
+  const infoWindowRef = useRef<kakao.maps.InfoWindow | null>(null)
+
+  // 채팅하기 버튼 클릭 핸들러
+  const handleChatClick = useCallback(
+    (userId: string) => {
+      console.log(
+        '💬 [useNearbyUsersMarkers] Chat button clicked for user:',
+        userId,
+      )
+      // 채팅 페이지로 이동
+      // router.push(`/chat?userId=${userId}`)
+      // 인포윈도우 닫기
+      closeInfoWindow()
+    },
+    [router],
+  )
+
+  // 전역 채팅 핸들러 설정
+  useEffect(() => {
+    setupGlobalChatHandler(handleChatClick)
+    return () => {
+      cleanupGlobalChatHandler()
+    }
+  }, [handleChatClick])
+
+  // 인포윈도우를 닫는 함수
+  const closeInfoWindow = () => {
+    if (infoWindowRef.current) {
+      infoWindowRef.current.close()
+      infoWindowRef.current = null
+      console.log('📌 [useNearbyUsersMarkers] InfoWindow closed')
+    }
+  }
+
+  // 지도 클릭 시 인포윈도우 닫기
+  useEffect(() => {
+    if (!map) return
+
+    const mapClickListener = () => {
+      closeInfoWindow()
+    }
+
+    kakao.maps.event.addListener(map, 'click', mapClickListener)
+
+    return () => {
+      kakao.maps.event.removeListener(map, 'click', mapClickListener)
+    }
+  }, [map])
 
   useEffect(() => {
     if (!map || !nearbyUsers) return
@@ -123,7 +179,7 @@ export const useNearbyUsersMarkers = ({
           map,
         })
 
-        // 마커 클릭 이벤트 (선택적)
+        // 마커 클릭 이벤트 - 인포윈도우 표시
         kakao.maps.event.addListener(marker, 'click', () => {
           console.log(
             `👤 [useNearbyUsersMarkers] Marker clicked for user: ${user.nickname}`,
@@ -134,6 +190,25 @@ export const useNearbyUsersMarkers = ({
               interests: user.interests,
               distance: user.distance ? Math.round(user.distance) : 'N/A',
             },
+          )
+
+          // 기존 인포윈도우가 있다면 닫기
+          closeInfoWindow()
+
+          // 인포윈도우 내용 생성 (유틸리티 함수 사용)
+          const infoContent = generateUserInfoContent({ user })
+
+          // 새 인포윈도우 생성 및 표시
+          const infoWindow = new kakao.maps.InfoWindow({
+            content: infoContent,
+          })
+
+          infoWindow.open(map, marker)
+          infoWindowRef.current = infoWindow
+
+          console.log(
+            '📌 [useNearbyUsersMarkers] InfoWindow opened for user:',
+            user.nickname,
           )
         })
 
@@ -148,15 +223,22 @@ export const useNearbyUsersMarkers = ({
     })
   }, [map, nearbyUsers])
 
-  // 컴포넌트 언마운트 시 모든 마커 정리
+  // 컴포넌트 언마운트 시 모든 마커 및 인포윈도우 정리
   useEffect(() => {
     const currentMarkers = markersRef.current
+    const currentInfoWindow = infoWindowRef.current
     return () => {
-      console.log('🧹 [useNearbyUsersMarkers] Cleaning up all markers')
+      console.log(
+        '🧹 [useNearbyUsersMarkers] Cleaning up all markers and infowindow',
+      )
       currentMarkers.forEach((marker) => {
         marker.setMap(null)
       })
       currentMarkers.clear()
+
+      if (currentInfoWindow) {
+        currentInfoWindow.close()
+      }
     }
   }, [])
 }
