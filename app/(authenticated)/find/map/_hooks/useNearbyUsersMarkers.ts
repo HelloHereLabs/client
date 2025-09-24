@@ -37,18 +37,14 @@ export const useNearbyUsersMarkers = ({
   const infoWindowRef = useRef<kakao.maps.InfoWindow | null>(null)
 
   // 채팅하기 버튼 클릭 핸들러
+  // 대화 요청 + 채팅방 이동 연동 필요 @iamlily
   const handleChatClick = useCallback(
     (userId: string) => {
-      console.log(
-        '💬 [useNearbyUsersMarkers] Chat button clicked for user:',
-        userId,
-      )
-      // 채팅 페이지로 이동
+      console.log(`Starting chat with user ${userId}`)
       // router.push(`/chat?userId=${userId}`)
-      // 인포윈도우 닫기
-      closeInfoWindow()
     },
-    [router],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   )
 
   // 전역 채팅 핸들러 설정

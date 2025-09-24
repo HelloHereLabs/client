@@ -8,6 +8,7 @@ import Grid from '@mui/material/Grid'
 import T from '@mui/material/Typography'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useSocketChatRequestHandler } from '../_hooks/useSocketChatRequestHandler'
 import FindButton from './FindButton'
 
 const FindContainer = () => {
@@ -17,6 +18,9 @@ const FindContainer = () => {
   const handleOnboardingEnd = () => {
     setShowOnboarding(false)
   }
+
+  // 소켓 채팅 요청 알림 핸들러
+  const { toastComponent } = useSocketChatRequestHandler()
 
   const BUTTONS = [
     {
@@ -115,6 +119,7 @@ const FindContainer = () => {
           </Box>
         </Box>
       )}
+      {toastComponent}
     </>
   )
 }
