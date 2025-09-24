@@ -5,6 +5,7 @@ import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import { useRouter } from 'next/navigation'
 import { useLocation } from '../../_contexts/LocationContext'
+import { useSocketChatRequestHandler } from '../_hooks/useSocketChatRequestHandler'
 import LocationLoadingSnackbar from './_components/LocationLoadingSnackbar'
 import LocationPermissionModal from './_components/LocationPermissionModal'
 import { useKakaoMap } from './_hooks/useKaKaoMap'
@@ -67,6 +68,9 @@ const MapPage = () => {
     requestPermission,
   })
 
+  // 소켓 채팅 요청 알림 핸들러
+  const { toastComponent } = useSocketChatRequestHandler()
+
   const handleBack = () => {
     router.back()
   }
@@ -101,6 +105,9 @@ const MapPage = () => {
         onRequestPermission={handlePermissionSettings}
         onCancel={handlePermissionCancel}
       />
+
+      {/* 채팅 토스트 알림 */}
+      {toastComponent}
     </Box>
   )
 }
