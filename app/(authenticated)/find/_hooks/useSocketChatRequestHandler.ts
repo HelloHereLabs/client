@@ -104,10 +104,10 @@ export const useSocketChatRequestHandler = () => {
     setIsToastVisible(false)
   }, [])
 
-  // 토스트 클릭 핸들러 (채팅방으로 이동)
+  // 대화 수락 핸들러 (채팅방으로 이동) @iamlily
   const handleToastClick = useCallback(() => {
     if (toastData?.senderId) {
-      router.push(`/chat?userId=${toastData.senderId}`)
+      //   router.push(`/chat?userId=${toastData.senderId}`)
       setIsToastVisible(false)
     }
   }, [toastData?.senderId, router])
