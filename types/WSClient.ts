@@ -24,15 +24,14 @@ export interface ChatRoom {
 
 export interface ChatMessage {
   id: string
-  userId: string
-  roomId?: string
+  chatroomId: string
+  sender: string
+  senderNickname: string
   message: string
-  type: 'text' | 'voice'
-  language: string
-  targetLanguage?: string
-  isSafe: boolean
-  filteredMessage?: string
   timestamp: number
+  read?: boolean
+  type?: 'text' | 'image' | 'system'
+  attachments?: string[]
 }
 
 export interface ChatEvent<T = any> {
