@@ -80,7 +80,7 @@ const ContainerBox = () => {
   }
 
   return (
-    <Container className="h-full w-full p-0 flex justify-center">
+    <Container className="h-full w-full p-0 pb-15 flex justify-center">
       {loading ? (
         <Button fullWidth loading loadingPosition="start" />
       ) : chatRooms.length > 0 ? (
