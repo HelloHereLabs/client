@@ -1,3 +1,6 @@
+import { useWebSocket } from '@/app/(authenticated)/_contexts/WebSocketContext'
+import { ChatStore } from '@/store/chatStore'
+import { useRouter } from 'next/router'
 import { useCallback, useEffect, useRef } from 'react'
 import {
   cleanupGlobalChatHandler,
@@ -33,13 +36,59 @@ export const useNearbyUsersMarkers = ({
   const markersRef = useRef<Map<string, kakao.maps.Marker>>(new Map())
   // 현재 열린 인포윈도우를 저장하는 ref
   const infoWindowRef = useRef<kakao.maps.InfoWindow | null>(null)
+  const router = useRouter()
+
+  // 채팅 웹소켓 컨텍스트
+  const { sendAndWait, isConnected } = useWebSocket()
 
   // 채팅하기 버튼 클릭 핸들러
   // 대화 요청 + 채팅방 이동 연동 필요 @iamlily
-  const handleChatClick = useCallback((userId: string) => {
-    console.log(`Starting chat with user ${userId}`)
-    // TODO: 채팅 요청 기능 구현
-  }, [])
+  const handleChatClick = useCallback(
+    async (userId: string) => {
+      console.log(`Starting chat with user ${userId}`)
+
+      // 웹소켓 연결 상태 확인
+      if (!isConnected) {
+        console.warn('❌ [useNearbyUsersMarkers] WebSocket not connected')
+        return
+      }
+
+      // 채팅 요청 메시지 전송 (스켈레톤)
+      try {
+        const chatRequestPayload = {
+          action: 'requestNewChat',
+          data: {
+            sender: userId,
+            reciever: userId,
+          },
+        }
+
+        // 대화요청 완료 및 생성된 채팅방 ID 수신 대기
+        const responseMsg = await sendAndWait(
+          chatRequestPayload,
+          (msg) => msg?.action === 'roomCreated',
+        )
+
+        if (responseMsg) {
+          const roomId = responseMsg.data.id
+          ChatStore.getState().setChatRoomId(roomId)
+          router.push(`/chat`)
+        } else {
+          console.error(
+            '❌ [useNearbyUsersMarkers] Failed to send chat request',
+          )
+          // TODO: 전송 실패 피드백
+        }
+      } catch (error) {
+        console.error(
+          '❌ [useNearbyUsersMarkers] Error sending chat request:',
+          error,
+        )
+        // TODO: 에러 처리
+      }
+    },
+    [sendAndWait, isConnected, router],
+  )
 
   // 전역 채팅 핸들러 설정
   useEffect(() => {
