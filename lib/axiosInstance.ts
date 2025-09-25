@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const axiosInstance = axios.create({
   baseURL: 'https://develop.d39gx5kr6gfiso.amplifyapp.com',
-  timeout: 10000, // 요청 타임아웃 (ms)
+  timeout: 100000, // 요청 타임아웃 (ms)
   headers: {
     'Content-Type': 'application/json',
     // 'Authorization': 'Bearer <token>', // 인증 토큰 예시

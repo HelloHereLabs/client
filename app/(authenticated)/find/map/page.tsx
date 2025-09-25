@@ -87,12 +87,25 @@ const MapPage = () => {
   const { requestAIMatch, isLoading: isAIMatchLoading } = useAIMatch({
     onSuccess: (result) => {
       console.log('🎯 AI 매칭 성공:', result)
-      setAIMatchResult(result)
+      setAIMatchResult({
+        type: 'ai-match',
+        ...result,
+      })
       setShowAIMatchToast(true)
     },
     onError: (error) => {
       console.error('❌ AI 매칭 실패:', error)
       // TODO: 에러 토스트 표시
+    },
+    onEmpty: (message) => {
+      console.log('ℹ️ AI 매칭 - 사용자 없음:', message)
+      // 알림 토스트로 메시지 표시
+      setAIMatchResult({
+        type: 'notification',
+        title: 'AI 매칭 결과',
+        message,
+      })
+      setShowAIMatchToast(true)
     },
   })
 
@@ -103,14 +116,6 @@ const MapPage = () => {
   const handleAIMatchToastClose = () => {
     setShowAIMatchToast(false)
     setAIMatchResult(null)
-  }
-
-  const handleViewProfile = () => {
-    if (aiMatchResult?.userId) {
-      // TODO: 프로필 페이지로 이동
-      console.log('프로필 보기:', aiMatchResult.userId)
-    }
-    handleAIMatchToastClose()
   }
 
   const handleStartChat = () => {
@@ -168,15 +173,29 @@ const MapPage = () => {
       {toastComponent}
 
       {/* AI 매칭 결과 토스트 */}
-      {aiMatchResult && (
+      {aiMatchResult && aiMatchResult.type === 'ai-match' && (
         <UniversalToast
           type="ai-match"
           isVisible={showAIMatchToast}
-          userName={aiMatchResult.userName}
-          matchScore={aiMatchResult.matchScore}
+          nickname={aiMatchResult.nickname}
+          score={aiMatchResult.score}
           reasons={aiMatchResult.reasons}
           onClose={handleAIMatchToastClose}
           onStartChat={handleStartChat}
+          autoClose={false}
+        />
+      )}
+
+      {/* AI 매칭 알림 토스트 */}
+      {aiMatchResult && aiMatchResult.type === 'notification' && (
+        <UniversalToast
+          type="notification"
+          isVisible={showAIMatchToast}
+          title={aiMatchResult.title}
+          message={aiMatchResult.message}
+          onClose={handleAIMatchToastClose}
+          autoClose={true}
+          autoCloseDelay={3000}
         />
       )}
 
