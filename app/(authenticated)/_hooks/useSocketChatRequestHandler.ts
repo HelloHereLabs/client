@@ -3,8 +3,8 @@
 import axiosInstance from '@/lib/axiosInstance'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useWebSocket } from '../../_contexts/WebSocketContext'
-import ChatRequestToast from '../_components/ChatRequestToast'
+import { useWebSocket } from '../_contexts/WebSocketContext'
+import UniversalToast from '../find/_components/UniversalToast'
 
 interface ChatMessage {
   action: string
@@ -104,13 +104,19 @@ export const useSocketChatRequestHandler = () => {
     setIsToastVisible(false)
   }, [])
 
-  // 토스트 클릭 핸들러 (채팅방으로 이동)
-  const handleToastClick = useCallback(() => {
+  // 채팅 요청 수락 핸들러
+  const handleAcceptChat = useCallback(() => {
     if (toastData?.senderId) {
       router.push(`/chat?userId=${toastData.senderId}`)
       setIsToastVisible(false)
     }
   }, [toastData?.senderId, router])
+
+  // 채팅 요청 거절 핸들러
+  const handleRejectChat = useCallback(() => {
+    setIsToastVisible(false)
+    // TODO: 서버에 거절 알림 전송
+  }, [])
 
   // 소켓 이벤트 리스너 등록/해제
   useEffect(() => {
@@ -141,13 +147,21 @@ export const useSocketChatRequestHandler = () => {
   const renderToast = useCallback(() => {
     if (!isToastVisible || !toastData) return null
 
-    return React.createElement(ChatRequestToast, {
+    return React.createElement(UniversalToast, {
+      type: 'chat-request',
       isVisible: true,
       senderName: toastData.senderName,
       onClose: handleCloseToast,
-      onClick: handleToastClick,
+      onAccept: handleAcceptChat,
+      onReject: handleRejectChat,
     })
-  }, [isToastVisible, toastData, handleCloseToast, handleToastClick])
+  }, [
+    isToastVisible,
+    toastData,
+    handleCloseToast,
+    handleAcceptChat,
+    handleRejectChat,
+  ])
 
   return {
     isConnected,
