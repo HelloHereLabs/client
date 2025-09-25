@@ -155,12 +155,12 @@ export const WebSocketProvider = ({
       const response = await axiosInstance.get(WS_TOKEN_URL)
 
       // 2. 메인 소켓 연결
-      const wsUrl = `${WS_BASE_URL}?token=${encodeURIComponent(response.data.token)}`
+      const wsUrl = `${WS_BASE_URL}?token=${encodeURIComponent('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlZWEzZGI2NC0xYTBhLTQ0NWEtODc3ZS1kMzQ0ZDk0MTdjMmYiLCJuaWNrbmFtZSI6IkNoZWVyZnVsTW91c2U1IiwibGFuZ3VhZ2UiOiJLb3JlYW4iLCJwdXJwb3NlIjoiTGFuZ3VhZ2UgRXhjaGFuZ2UiLCJ0eXBlIjoid2Vic29ja2V0IiwiaWF0IjoxNzU4NjEzMTIzLCJleHAiOjE3NTg4NzIzMjN9.e61Oc8bEuacFgva2MtmeOdKOHPHzXTnGLe5181498LE')}`
       socketRef.current = new WebSocket(wsUrl)
       setupSocketEvents(socketRef.current)
 
       // 3. Presence 소켓 연결
-      const presenceWsUrl = `${WS_PRESENCE_BASE_URL}?token=${encodeURIComponent(response.data.token)}`
+      const presenceWsUrl = `${WS_PRESENCE_BASE_URL}?token=${encodeURIComponent('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlZWEzZGI2NC0xYTBhLTQ0NWEtODc3ZS1kMzQ0ZDk0MTdjMmYiLCJuaWNrbmFtZSI6IkNoZWVyZnVsTW91c2U1IiwibGFuZ3VhZ2UiOiJLb3JlYW4iLCJwdXJwb3NlIjoiTGFuZ3VhZ2UgRXhjaGFuZ2UiLCJ0eXBlIjoid2Vic29ja2V0IiwiaWF0IjoxNzU4NjEzMTIzLCJleHAiOjE3NTg4NzIzMjN9.e61Oc8bEuacFgva2MtmeOdKOHPHzXTnGLe5181498LE')}`
       socketPresenceRef.current = new WebSocket(presenceWsUrl)
       setupPresenceSocketEvents(socketPresenceRef.current)
     } catch (error) {

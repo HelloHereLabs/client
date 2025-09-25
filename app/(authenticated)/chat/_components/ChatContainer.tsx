@@ -6,7 +6,7 @@ import ChatRooms from './ChatRooms'
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import Button from '@mui/material/Button'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import ChatInput from './ChatInput'
 import MyChat from './MyChat'
 import UrChat from './UrChat'
@@ -17,12 +17,24 @@ interface ChatRoomsProps {
 
 const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
   const { onEvent, sendMessage } = useWebSocket()
+  const chatContainerRef = useRef(null)
 
   const { chatRoomId, setChatRoomId } = ChatStore()
   const { chatMsgs, getChatHistory, sendChatMsg, leaveRoom } = useChatEvent()
   const [inputValue, setInputValue] = useState<string>('')
 
-  // localStorage에서 userId 가져오기
+  const [target, setTarget] = useState<string | null>('')
+
+  const getTarget = () => {
+    if (typeof window !== 'undefined') {
+      setTarget(localStorage.getItem('target'))
+    }
+  }
+
+  useEffect(() => {
+    getTarget()
+  }, [])
+
   const getUserId = () => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('user-id')
@@ -39,6 +51,19 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
     () => currentRoom?.participants?.receiver ?? null,
     [currentRoom],
   )
+
+  // // scroll
+  // useEffect(() => {
+  //   if (!chatRoomId) return
+  //   if (!chatMsgs?.length) return
+  //   if (chatContainerRef.current) return
+  //   const el = chatContainerRef
+  //   requestAnimationFrame(() => {
+  //     chatContainerRef.scrollTop = el.scrollHeight
+  //   })
+  // }, [chatMsgs, chatRoomId])
+
+  // 번역 토글
 
   // 채팅 히스토리
   useEffect(() => {
@@ -79,7 +104,7 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
   }
 
   return (
-    <div className="h-full w-full ">
+    <div className="h-full w-full flex flex-col ">
       <div className="flex justify-between items-center h-13 rounded-t-4xl pt-1 px-6 bg-hh-secondary text-hh-color4 font-bold ">
         {theSender ? (
           <ArrowBackIcon onClick={() => setChatRoomId('')} className="mr-1" />
@@ -103,7 +128,8 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
         )}
       </div>
       <div
-        className={`relative flex flex-wrap flex-col items-center pb-15 bg-hh-color9 overflow-y-auto overflow-x-hidden ${chatRoomId ? '' : 'h-full'} flex-1 min-h-0 `}
+        className={`relative flex flex-col flex-1 min-h-0 items-center pb-15 bg-hh-color9 overflow-y-auto overflow-x-hidden flex-1 min-h-0 `}
+        ref={chatContainerRef}
       >
         {!chatRoomId
           ? chatRooms?.map((chatRoom: ChatRoom) => {
@@ -123,17 +149,15 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
               )
             })
           : chatMsgs?.map((chatMsg: ChatMessage) => {
-              return chatMsg.userId !== theSender ? (
-                <MyChat
-                  key={chatMsg.id}
-                  chat={chatMsg}
-                  // isRead={chat.isRead}
-                />
+              return chatMsg.sender === getUserId() ? (
+                <MyChat key={chatMsg.id} chat={chatMsg} />
               ) : (
                 <UrChat
                   key={chatMsg.id}
                   chat={chatMsg}
-                  // isRead={chat.isRead}
+                  target={target}
+                  userId={getUserId()}
+                  chatroomId={chatRoomId}
                 />
               )
             })}
