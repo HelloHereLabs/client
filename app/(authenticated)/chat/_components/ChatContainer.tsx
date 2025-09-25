@@ -111,7 +111,7 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
 
   return (
     <div className="h-full w-full flex flex-col ">
-      <div className="flex justify-between items-center h-13 rounded-t-4xl pt-1 px-6 bg-hh-secondary text-hh-color4 font-bold ">
+      <div className="flex-none flex justify-between items-center h-13 rounded-t-4xl pt-1 px-6 bg-hh-secondary text-hh-color4 font-bold">
         {theSender ? (
           <ArrowBackIcon onClick={() => setChatRoomId('')} className="mr-1" />
         ) : (
@@ -134,7 +134,7 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
         )}
       </div>
       <div
-        className={`relative flex flex-col flex-1 min-h-0 items-center pb-15 bg-hh-color9 overflow-y-auto overflow-x-hidden flex-1 min-h-0 `}
+        className={`relative flex flex-col flex-1 min-h-0 items-center pb-2 bg-hh-color9 overflow-y-auto overflow-x-hidden flex-1 min-h-0 `}
         ref={chatContainerRef}
       >
         {!chatRoomId && toastComponent}
@@ -184,15 +184,17 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
       </div>
 
       {chatRoomId ? (
-        <ChatInput
-          userId={getUserId()}
-          chatroomId={chatRoomId}
-          inputValue={inputValue}
-          setInputValue={setInputValue}
-          sendMsg={sendMsg}
-          type={type}
-          setType={setType}
-        />
+        <div className="flex-none">
+          <ChatInput
+            userId={getUserId()}
+            chatroomId={chatRoomId}
+            inputValue={inputValue}
+            setInputValue={setInputValue}
+            sendMsg={sendMsg}
+            type={type}
+            setType={setType}
+          />
+        </div>
       ) : (
         ''
       )}
