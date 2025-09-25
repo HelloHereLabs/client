@@ -26,8 +26,8 @@ interface ChatRequestToastProps extends BaseToastProps {
 
 interface AIMatchToastProps extends BaseToastProps {
   type: 'ai-match'
-  userName: string
-  matchScore: number
+  nickname: string
+  score: number
   reasons?: string[]
   onViewProfile?: () => void
   onStartChat?: () => void
@@ -126,7 +126,7 @@ const UniversalToast = (props: UniversalToastProps) => {
       }
 
       case 'ai-match': {
-        const { userName, matchScore, reasons, onStartChat } =
+        const { nickname, score, reasons, onStartChat } =
           props as AIMatchToastProps
         return (
           <div className="flex items-start justify-between">
@@ -139,8 +139,8 @@ const UniversalToast = (props: UniversalToastProps) => {
                   🎯 AI 매칭 결과
                 </div>
                 <div className="text-gray-700 text-sm mb-2">
-                  <strong>{userName}</strong>님과 <br />
-                  {matchScore * 100}% 매칭되었습니다!
+                  <strong>{nickname}</strong>님과 <br />
+                  {(score * 100).toFixed(2)}% 매칭되었습니다!
                 </div>
                 {reasons && reasons.length > 0 && (
                   <div className="text-xs text-gray-600 mb-3">
