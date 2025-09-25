@@ -8,7 +8,7 @@ import Grid from '@mui/material/Grid'
 import T from '@mui/material/Typography'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { useSocketChatRequestHandler } from '../_hooks/useSocketChatRequestHandler'
+import { useSocketChatRequestHandler } from '../../_hooks/useSocketChatRequestHandler'
 import FindButton from './FindButton'
 
 const FindContainer = () => {

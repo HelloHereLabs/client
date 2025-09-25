@@ -4,10 +4,15 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { useLocation } from '../../_contexts/LocationContext'
-import { useSocketChatRequestHandler } from '../_hooks/useSocketChatRequestHandler'
+import { useSocketChatRequestHandler } from '../../_hooks/useSocketChatRequestHandler'
+import UniversalToast from '../_components/UniversalToast'
+import AIMatchButton from './_components/AIMatchButton'
+import { useGlobalChatRequestModal } from './_components/ChatRequestModal'
 import LocationLoadingSnackbar from './_components/LocationLoadingSnackbar'
 import LocationPermissionModal from './_components/LocationPermissionModal'
+import { useAIMatch } from './_hooks/useAIMatch'
 import { useKakaoMap } from './_hooks/useKaKaoMap'
 import { useLocationMarker } from './_hooks/useLocationMarker'
 import { useNearbyUsers } from './_hooks/useNearbyUsers'
@@ -71,6 +76,52 @@ const MapPage = () => {
   // 소켓 채팅 요청 알림 핸들러
   const { toastComponent } = useSocketChatRequestHandler()
 
+  // 글로벌 채팅 요청 모달
+  const { ChatRequestModalComponent } = useGlobalChatRequestModal()
+
+  // AI 매칭 상태
+  const [showAIMatchToast, setShowAIMatchToast] = useState(true)
+  const [aiMatchResult, setAIMatchResult] = useState<any>(null)
+
+  // AI 매칭 훅
+  const { requestAIMatch, isLoading: isAIMatchLoading } = useAIMatch({
+    onSuccess: (result) => {
+      console.log('🎯 AI 매칭 성공:', result)
+      setAIMatchResult(result)
+      setShowAIMatchToast(true)
+    },
+    onError: (error) => {
+      console.error('❌ AI 매칭 실패:', error)
+      // TODO: 에러 토스트 표시
+    },
+  })
+
+  const handleAIMatch = async () => {
+    await requestAIMatch()
+  }
+
+  const handleAIMatchToastClose = () => {
+    setShowAIMatchToast(false)
+    setAIMatchResult(null)
+  }
+
+  const handleViewProfile = () => {
+    if (aiMatchResult?.userId) {
+      // TODO: 프로필 페이지로 이동
+      console.log('프로필 보기:', aiMatchResult.userId)
+    }
+    handleAIMatchToastClose()
+  }
+
+  const handleStartChat = () => {
+    if (aiMatchResult?.userId) {
+      console.log('채팅 시작')
+      // 대화요청 로직 추가 @gohoney, @iamlily
+      // router.push(`/chat?userId=${aiMatchResult.userId}`)
+    }
+    handleAIMatchToastClose()
+  }
+
   const handleBack = () => {
     router.back()
   }
@@ -95,8 +146,15 @@ const MapPage = () => {
       </Box>
 
       {/* 지도 영역 */}
-      <Box className="flex-1">
+      <Box className="flex-1 relative">
         <Box id="map" className="w-full h-full"></Box>
+
+        {/* AI 매칭 버튼 */}
+        <AIMatchButton
+          onMatch={handleAIMatch}
+          isLoading={isAIMatchLoading}
+          disabled={!currentLatitude || !currentLongitude}
+        />
       </Box>
 
       {/* 위치 권한 모달 */}
@@ -106,8 +164,24 @@ const MapPage = () => {
         onCancel={handlePermissionCancel}
       />
 
-      {/* 채팅 토스트 알림 */}
+      {/* 채팅 요청 토스트 알림 */}
       {toastComponent}
+
+      {/* AI 매칭 결과 토스트 */}
+      {aiMatchResult && (
+        <UniversalToast
+          type="ai-match"
+          isVisible={showAIMatchToast}
+          userName={aiMatchResult.userName}
+          matchScore={aiMatchResult.matchScore}
+          reasons={aiMatchResult.reasons}
+          onClose={handleAIMatchToastClose}
+          onStartChat={handleStartChat}
+        />
+      )}
+
+      {/* 채팅 요청 확인 모달 */}
+      {ChatRequestModalComponent}
     </Box>
   )
 }
