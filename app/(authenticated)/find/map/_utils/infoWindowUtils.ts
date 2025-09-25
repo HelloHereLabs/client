@@ -1,3 +1,4 @@
+import { openChatRequestModal } from '../_components/ChatRequestModal'
 import { NearbyUser } from '../_hooks/useNearbyUsers'
 
 /**
@@ -42,9 +43,11 @@ export const generateUserInfoContent = ({
       </div>
       </div>
       <button
-        onclick="window.handleUserInfoChat && window.handleUserInfoChat('${user.userId}')"
+        onclick="window.handleUserInfoChat && window.handleUserInfoChat('${user.userId}', '${user.nickname}')"
         class="w-[25%] cursor-pointer flex items-center justify-center"
         title="채팅하기"
+        data-user-id="${user.userId}"
+        data-user-name="${user.nickname}"
       >
         <img src="/icons/map-chat-icon.svg" alt="채팅" class="w-4 h-4" />
       </button>
@@ -54,13 +57,17 @@ export const generateUserInfoContent = ({
 
 /**
  * 전역 이벤트 핸들러 설정
- * @param onChatClick 채팅 버튼 클릭 핸들러
+ * @param onChatClick 채팅 버튼 클릭 핸들러 (모달 확인 버튼에서 실행됨)
  */
 export const setupGlobalChatHandler = (
   onChatClick: (userId: string) => void,
 ) => {
-  // 전역 객체에 핸들러 등록
-  ;(window as any).handleUserInfoChat = onChatClick
+  // 전역 객체에 핸들러 등록 - 모달을 열고 확인 시 onChatClick 실행
+  ;(window as any).handleUserInfoChat = (userId: string, userName: string) => {
+    openChatRequestModal(userId, userName, () => {
+      onChatClick(userId)
+    })
+  }
 }
 
 /**

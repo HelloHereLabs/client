@@ -1,4 +1,3 @@
-import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef } from 'react'
 import {
   cleanupGlobalChatHandler,
@@ -30,7 +29,6 @@ export const useNearbyUsersMarkers = ({
   map,
   nearbyUsers,
 }: UseNearbyUsersMarkersParams) => {
-  const router = useRouter()
   // 현재 활성화된 마커들을 저장하는 ref
   const markersRef = useRef<Map<string, kakao.maps.Marker>>(new Map())
   // 현재 열린 인포윈도우를 저장하는 ref
@@ -38,14 +36,10 @@ export const useNearbyUsersMarkers = ({
 
   // 채팅하기 버튼 클릭 핸들러
   // 대화 요청 + 채팅방 이동 연동 필요 @iamlily
-  const handleChatClick = useCallback(
-    (userId: string) => {
-      console.log(`Starting chat with user ${userId}`)
-      // router.push(`/chat?userId=${userId}`)
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  )
+  const handleChatClick = useCallback((userId: string) => {
+    console.log(`Starting chat with user ${userId}`)
+    // TODO: 채팅 요청 기능 구현
+  }, [])
 
   // 전역 채팅 핸들러 설정
   useEffect(() => {
