@@ -3,6 +3,7 @@ import { ChatStore } from '@/store/chatStore'
 import { ChatMessage, ChatRoom } from '@/types/WSClient'
 import useChatEvent from '../_hooks/useChatEvent'
 import ChatRooms from './ChatRooms'
+import ChatAlert from './ChatAlert'
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import Button from '@mui/material/Button'
@@ -10,12 +11,16 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import ChatInput from './ChatInput'
 import MyChat from './MyChat'
 import UrChat from './UrChat'
+import { useSocketChatRequestHandler } from '../../_hooks/useSocketChatRequestHandler'
+import PushToTalk from './PushToTalk'
 
 interface ChatRoomsProps {
   chatRooms?: ChatRoom[]
 }
 
 const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
+  const { toastComponent } = useSocketChatRequestHandler()
+
   const { onEvent, sendMessage } = useWebSocket()
   const chatContainerRef = useRef(null)
 
@@ -24,6 +29,7 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
   const [inputValue, setInputValue] = useState<string>('')
 
   const [target, setTarget] = useState<string | null>('')
+  const [type, setType] = useState<string>('')
 
   const getTarget = () => {
     if (typeof window !== 'undefined') {
@@ -52,7 +58,7 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
     [currentRoom],
   )
 
-  // // scroll
+  // scroll
   // useEffect(() => {
   //   if (!chatRoomId) return
   //   if (!chatMsgs?.length) return
@@ -62,8 +68,6 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
   //     chatContainerRef.scrollTop = el.scrollHeight
   //   })
   // }, [chatMsgs, chatRoomId])
-
-  // 번역 토글
 
   // 채팅 히스토리
   useEffect(() => {
@@ -103,6 +107,8 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
     setChatRoomId('')
   }
 
+  console.log(type)
+
   return (
     <div className="h-full w-full flex flex-col ">
       <div className="flex justify-between items-center h-13 rounded-t-4xl pt-1 px-6 bg-hh-secondary text-hh-color4 font-bold ">
@@ -131,36 +137,50 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
         className={`relative flex flex-col flex-1 min-h-0 items-center pb-15 bg-hh-color9 overflow-y-auto overflow-x-hidden flex-1 min-h-0 `}
         ref={chatContainerRef}
       >
-        {!chatRoomId
-          ? chatRooms?.map((chatRoom: ChatRoom) => {
-              const handleChatRoomClick = () => {
-                if (chatRoom.id !== chatRoomId) {
-                  setChatRoomId(chatRoom.id)
-                }
+        {!chatRoomId && toastComponent}
+        {!chatRoomId ? (
+          chatRooms?.map((chatRoom: ChatRoom) => {
+            const handleChatRoomClick = () => {
+              if (chatRoom.id !== chatRoomId) {
+                setChatRoomId(chatRoom.id)
               }
-              return (
-                <div
-                  className="flex justify-center w-full"
+            }
+            return (
+              <div
+                className="flex justify-center w-full"
+                key={chatRoom.id}
+                onClick={handleChatRoomClick}
+              >
+                <ChatRooms
                   key={chatRoom.id}
-                  onClick={handleChatRoomClick}
-                >
-                  <ChatRooms key={chatRoom.id} chatRoom={chatRoom} />
-                </div>
-              )
-            })
-          : chatMsgs?.map((chatMsg: ChatMessage) => {
-              return chatMsg.sender === getUserId() ? (
-                <MyChat key={chatMsg.id} chat={chatMsg} />
-              ) : (
-                <UrChat
-                  key={chatMsg.id}
-                  chat={chatMsg}
-                  target={target}
-                  userId={getUserId()}
-                  chatroomId={chatRoomId}
+                  chatRoom={chatRoom}
+                  setType={setType}
                 />
-              )
-            })}
+              </div>
+            )
+          })
+        ) : type === 'chat' ? (
+          chatMsgs?.map((chatMsg: ChatMessage) => {
+            return chatMsg.sender === getUserId() ? (
+              <MyChat key={chatMsg.id} chat={chatMsg} />
+            ) : (
+              <UrChat
+                key={chatMsg.id}
+                chat={chatMsg}
+                target={target}
+                userId={getUserId()}
+                chatroomId={chatRoomId}
+              />
+            )
+          })
+        ) : (
+          <PushToTalk
+            type={type}
+            target={target}
+            userId={getUserId()}
+            chatroomId={chatRoomId}
+          />
+        )}
       </div>
 
       {chatRoomId ? (
@@ -170,6 +190,8 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
           inputValue={inputValue}
           setInputValue={setInputValue}
           sendMsg={sendMsg}
+          type={type}
+          setType={setType}
         />
       ) : (
         ''

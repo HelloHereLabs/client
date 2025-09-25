@@ -8,6 +8,8 @@ interface ChatInputProps {
   inputValue: string
   setInputValue: (v: string) => void
   sendMsg: () => void
+  type: string
+  setType: (v: string) => void
 }
 
 const ChatInput = ({
@@ -15,6 +17,8 @@ const ChatInput = ({
   setInputValue,
   sendMsg,
   chatroomId,
+  type,
+  setType,
 }: ChatInputProps) => {
   const handleEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -30,10 +34,15 @@ const ChatInput = ({
     }
   }
 
+  const handleType = () => {
+    if (type !== 'voice') setType('voice')
+    else setType('chat')
+  }
+
   return (
     <div className="flex justify-between w-full h-14 p-2 pl-3 bg-hh-color4 sticky bottom-13 ">
       <div className="flex justify-center items-center rounded-full w-9 h-9 bg-hh-secondary text-hh-white">
-        <MicIcon />
+        <MicIcon onClick={handleType} />
       </div>
 
       <TextField
