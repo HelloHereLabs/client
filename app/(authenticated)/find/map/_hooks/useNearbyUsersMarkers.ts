@@ -1,6 +1,6 @@
 import { useWebSocket } from '@/app/(authenticated)/_contexts/WebSocketContext'
 import { ChatStore } from '@/store/chatStore'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef } from 'react'
 import {
   cleanupGlobalChatHandler,
@@ -42,10 +42,9 @@ export const useNearbyUsersMarkers = ({
   const { sendAndWait, isConnected } = useWebSocket()
 
   // 채팅하기 버튼 클릭 핸들러
-  // 대화 요청 + 채팅방 이동 연동 필요 @iamlily
   const handleChatClick = useCallback(
-    async (userId: string) => {
-      console.log(`Starting chat with user ${userId}`)
+    async (senderId: string, receiverId: string) => {
+      console.log(`Starting chat with user ${senderId}`)
 
       // 웹소켓 연결 상태 확인
       if (!isConnected) {
@@ -58,8 +57,8 @@ export const useNearbyUsersMarkers = ({
         const chatRequestPayload = {
           action: 'requestNewChat',
           data: {
-            sender: userId,
-            reciever: userId,
+            sender: senderId,
+            receiver: receiverId,
           },
         }
 

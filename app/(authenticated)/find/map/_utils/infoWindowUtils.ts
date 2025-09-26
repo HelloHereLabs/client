@@ -60,12 +60,13 @@ export const generateUserInfoContent = ({
  * @param onChatClick 채팅 버튼 클릭 핸들러 (모달 확인 버튼에서 실행됨)
  */
 export const setupGlobalChatHandler = (
-  onChatClick: (userId: string) => void,
+  onChatClick: (senderId: string, receiverId: string) => void,
 ) => {
   // 전역 객체에 핸들러 등록 - 모달을 열고 확인 시 onChatClick 실행
   ;(window as any).handleUserInfoChat = (userId: string, userName: string) => {
     openChatRequestModal(userId, userName, () => {
-      onChatClick(userId)
+      const senderId = localStorage.getItem('user-id') || ''
+      onChatClick(senderId, userId)
     })
   }
 }

@@ -1,10 +1,12 @@
 'use client'
 
+import { useWebSocket } from '@/app/(authenticated)/_contexts/WebSocketContext'
+import { ChatStore } from '@/store/chatStore'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useLocation } from '../../_contexts/LocationContext'
 import { useSocketChatRequestHandler } from '../../_hooks/useSocketChatRequestHandler'
 import UniversalToast from '../_components/UniversalToast'
@@ -35,6 +37,8 @@ const MapPage = () => {
   const router = useRouter()
   const map = useKakaoMap() // 카카오맵 인스턴스
   const { locationResult, requestPermission, isTracking } = useLocation() // 위치 컨텍스트
+  // 채팅 웹소켓 컨텍스트
+  const { sendAndWait, isConnected } = useWebSocket()
 
   // 현재 위치에서 위도/경도 추출
   const currentLatitude = locationResult?.data?.latitude
@@ -118,14 +122,52 @@ const MapPage = () => {
     setAIMatchResult(null)
   }
 
-  const handleStartChat = () => {
-    if (aiMatchResult?.userId) {
-      console.log('채팅 시작')
-      // 대화요청 로직 추가 @gohoney, @iamlily
-      // router.push(`/chat?userId=${aiMatchResult.userId}`)
-    }
-    handleAIMatchToastClose()
-  }
+  const handleStartChat = useCallback(
+    async (senderId: string, receiverId: string) => {
+      console.log(`Starting chat with user ${senderId}`)
+
+      // 웹소켓 연결 상태 확인
+      if (!isConnected) {
+        console.warn('❌ [useNearbyUsersMarkers] WebSocket not connected')
+        return
+      }
+
+      // 채팅 요청 메시지 전송 (스켈레톤)
+      try {
+        const chatRequestPayload = {
+          action: 'requestNewChat',
+          data: {
+            sender: senderId,
+            receiver: receiverId,
+          },
+        }
+
+        // 대화요청 완료 및 생성된 채팅방 ID 수신 대기
+        const responseMsg = await sendAndWait(
+          chatRequestPayload,
+          (msg) => msg?.action === 'roomCreated',
+        )
+
+        if (responseMsg) {
+          const roomId = responseMsg.data.id
+          ChatStore.getState().setChatRoomId(roomId)
+          router.push(`/chat`)
+        } else {
+          console.error(
+            '❌ [useNearbyUsersMarkers] Failed to send chat request',
+          )
+          // TODO: 전송 실패 피드백
+        }
+      } catch (error) {
+        console.error(
+          '❌ [useNearbyUsersMarkers] Error sending chat request:',
+          error,
+        )
+        // TODO: 에러 처리
+      }
+    },
+    [sendAndWait, isConnected, router],
+  )
 
   const handleBack = () => {
     router.back()
@@ -181,7 +223,10 @@ const MapPage = () => {
           score={aiMatchResult.score}
           reasons={aiMatchResult.reasons}
           onClose={handleAIMatchToastClose}
-          onStartChat={handleStartChat}
+          onStartChat={() => {
+            const senderId = localStorage.getItem('user-id') || ''
+            handleStartChat(senderId, aiMatchResult.userId)
+          }}
           autoClose={false}
         />
       )}
