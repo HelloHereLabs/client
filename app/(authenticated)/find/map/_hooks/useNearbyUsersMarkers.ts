@@ -1,5 +1,4 @@
 import { useWebSocket } from '@/app/(authenticated)/_contexts/WebSocketContext'
-import { ChatStore } from '@/store/chatStore'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef } from 'react'
 import {
@@ -69,8 +68,6 @@ export const useNearbyUsersMarkers = ({
         )
 
         if (responseMsg) {
-          const roomId = responseMsg.data.id
-          ChatStore.getState().setChatRoomId(roomId)
           router.push(`/chat`)
         } else {
           console.error(
