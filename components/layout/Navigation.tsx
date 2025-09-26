@@ -31,7 +31,11 @@ const AppNavigation = () => {
   const [location, setLocation] = useState(pathname)
 
   useEffect(() => {
-    setLocation(getMatchedNavValue(pathname))
+    if (['/quest', '/my'].includes(pathname)) {
+      alert('준비중인 서비스입니다.')
+    } else {
+      setLocation(getMatchedNavValue(pathname))
+    }
   }, [pathname])
 
   return (
