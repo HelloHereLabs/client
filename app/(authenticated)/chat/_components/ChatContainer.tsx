@@ -1,6 +1,6 @@
 import { useWebSocket } from '@/app/(authenticated)/_contexts/WebSocketContext'
 import { ChatStore } from '@/store/chatStore'
-import { ChatMessage, ChatRoom } from '@/types/WSClient'
+import { ChatMessage, ChatRoom, ReceiveNewChat } from '@/types/WSClient'
 import useChatEvent from '../_hooks/useChatEvent'
 import ChatRooms from './ChatRooms'
 import ChatAlert from './ChatAlert'
@@ -30,6 +30,7 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
 
   const [target, setTarget] = useState<string | null>('')
   const [type, setType] = useState<string>('chat')
+  const [newRoom, setNewRoom] = useState<ReceiveNewChat | null>(null)
 
   const getTarget = () => {
     if (typeof window !== 'undefined') {
@@ -82,6 +83,13 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
       getChatHistory(chatRoomId, userId)
     })
 
+    const scribe = onEvent('receiveNewChat', (msg: ReceiveNewChat) => {
+      setNewRoom(msg)
+      return msg
+    })
+
+    scribe()
+
     return unsubscribe
   }, [chatRoomId, getChatHistory, onEvent])
 
@@ -106,8 +114,6 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
 
     setChatRoomId('')
   }
-
-  console.log(type)
 
   return (
     <div className="h-full w-full flex flex-col ">
@@ -137,7 +143,11 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
         className={`relative flex flex-col flex-1 min-h-0 items-center pb-2 bg-hh-color9 overflow-y-auto overflow-x-hidden flex-1 min-h-0 `}
         ref={chatContainerRef}
       >
-        {!chatRoomId && toastComponent}
+        {!chatRoomId && newRoom ? (
+          <ChatAlert newRoom={newRoom} setNewRoom={setNewRoom} />
+        ) : (
+          ''
+        )}
         {!chatRoomId ? (
           chatRooms?.map((chatRoom: ChatRoom) => {
             const handleChatRoomClick = () => {
