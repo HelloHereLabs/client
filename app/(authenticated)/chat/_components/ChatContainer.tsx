@@ -7,7 +7,14 @@ import ChatAlert from './ChatAlert'
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import Button from '@mui/material/Button'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import ChatInput from './ChatInput'
 import MyChat from './MyChat'
 import UrChat from './UrChat'
@@ -16,9 +23,15 @@ import PushToTalk from './PushToTalk'
 
 interface ChatRoomsProps {
   chatRooms?: ChatRoom[]
+  pendingRooms?: ReceiveNewChat[]
+  setPendingRooms: Dispatch<SetStateAction<ReceiveNewChat[]>>
 }
 
-const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
+const ChatContainer = ({
+  chatRooms,
+  pendingRooms,
+  setPendingRooms,
+}: ChatRoomsProps) => {
   const { onEvent, sendMessage } = useWebSocket()
   const chatContainerRef = useRef(null)
 
@@ -28,7 +41,6 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
 
   const [target, setTarget] = useState<string | null>('')
   const [type, setType] = useState<string>('chat')
-  const [pendingRooms, setPendingRooms] = useState<ReceiveNewChat[]>([])
 
   const getTarget = () => {
     if (typeof window !== 'undefined') {
@@ -85,16 +97,6 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
   }, [chatRoomId, getChatHistory, onEvent])
 
   // 알림 스택
-  useEffect(() => {
-    if (chatRoomId) return
-    const unsubscribe = onEvent('receiveNewChat', (e: ReceiveNewChat) => {
-      setPendingRooms((prev) => {
-        if (prev.some((r) => r.chatroomId === e.chatroomId)) return prev
-        return [...prev, e]
-      })
-    })
-    return unsubscribe
-  }, [chatRoomId, onEvent])
 
   // 메세지 보내기
   const sendMsg = () => {
