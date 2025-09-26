@@ -63,8 +63,8 @@ export const useSocketChatRequestHandler = () => {
         // 토스트 데이터 설정
         const newToastData: ToastData = {
           senderName: senderNickname,
-          sender: message.sender,
-          chatId: message.chatRoomId,
+          sender: message.data.sender,
+          chatId: message.data.chatRoomId,
         }
 
         setToastData(newToastData)
@@ -106,6 +106,11 @@ export const useSocketChatRequestHandler = () => {
 
   // 채팅 요청 수락 핸들러
   const handleAcceptChat = useCallback(() => {
+    console.log(
+      '🟢 [useSocketChatRequestHandler] Accept chat clicked:',
+      toastData,
+    )
+
     if (toastData?.sender) {
       const receiver = localStorage.getItem('user-id')
       // 소켓으로 메세지 발송 - 채팅 요청 수락 알림
@@ -119,15 +124,28 @@ export const useSocketChatRequestHandler = () => {
           },
         }
 
+        console.log(
+          '📤 [useSocketChatRequestHandler] Sending accept message:',
+          messagePayload,
+        )
         sendMessage(messagePayload)
         router.push(`/chat`)
       }
       setIsToastVisible(false)
+    } else {
+      console.warn(
+        '⚠️ [useSocketChatRequestHandler] No sender data available for accept',
+      )
     }
-  }, [toastData?.sender, toastData?.chatId, sendMessage, router])
+  }, [toastData, sendMessage, router])
 
   // 채팅 요청 거절 핸들러
   const handleRejectChat = useCallback(() => {
+    console.log(
+      '🔴 [useSocketChatRequestHandler] Reject chat clicked:',
+      toastData,
+    )
+
     // 소켓으로 메세지 발송 - 채팅 요청 거절 알림
     if (toastData?.sender && sendMessage) {
       const receiver = localStorage.getItem('user-id')
@@ -139,7 +157,16 @@ export const useSocketChatRequestHandler = () => {
           chatRoomId: toastData.chatId,
         },
       }
+
+      console.log(
+        '📤 [useSocketChatRequestHandler] Sending reject message:',
+        messagePayload,
+      )
       sendMessage(messagePayload)
+    } else {
+      console.warn(
+        '⚠️ [useSocketChatRequestHandler] No sender data available for reject',
+      )
     }
     setIsToastVisible(false)
   }, [toastData, sendMessage])
@@ -171,7 +198,22 @@ export const useSocketChatRequestHandler = () => {
 
   // 토스트 컴포넌트 렌더링 함수
   const renderToast = useCallback(() => {
-    if (!isToastVisible || !toastData) return null
+    if (!isToastVisible || !toastData) {
+      console.log('🚫 [useSocketChatRequestHandler] Toast not rendered:', {
+        isToastVisible,
+        toastData,
+      })
+      return null
+    }
+
+    console.log(
+      '🎨 [useSocketChatRequestHandler] Rendering toast with handlers:',
+      {
+        toastData,
+        hasAcceptHandler: !!handleAcceptChat,
+        hasRejectHandler: !!handleRejectChat,
+      },
+    )
 
     return React.createElement(UniversalToast, {
       type: 'chat-request',
