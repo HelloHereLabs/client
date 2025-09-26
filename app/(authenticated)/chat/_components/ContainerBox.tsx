@@ -1,7 +1,7 @@
 'use client'
 
 import { useWebSocket } from '@/app/(authenticated)/_contexts/WebSocketContext'
-import { ChatRoom } from '@/types/WSClient'
+import { ChatRoom, ReceiveNewChat } from '@/types/WSClient'
 import Button from '@mui/material/Button'
 import Container from '@mui/material/Container'
 import { useEffect, useState } from 'react'
@@ -13,6 +13,7 @@ const ContainerBox = () => {
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [pendingRooms, setPendingRooms] = useState<ReceiveNewChat[]>([])
 
   // localStorage에서 userId 가져오기
   const getUserId = () => {
@@ -24,34 +25,40 @@ const ContainerBox = () => {
 
   // 채팅방 목록 요청 및 수신
   useEffect(() => {
-    if (!isConnected) return
-
     const userId = getUserId()
-    if (!userId) {
-      setError('사용자 ID를 찾을 수 없습니다.')
-      setLoading(false)
-      return
+    if (!userId) return
+
+    const pushPending = (e: ReceiveNewChat) =>
+      setPendingRooms((prev) => {
+        const id = e.chatroomId ?? e.chatroomId
+        if (!id) return prev
+        if (prev.some((r) => r.chatroomId === id)) return prev
+        return [...prev, { ...e, chatroomId: id }]
+      })
+
+    const offReceive = onEvent('receiveNewChat', pushPending)
+    const offRequest = onEvent('requestNewChat', pushPending)
+
+    const offCreated = onEvent('roomCreated', (e: ReceiveNewChat) => {
+      const id = e.chatroomId ?? e.chatroomId
+      const sender = e.sender ?? e.sender
+      const receiver = e.receiver ?? e.receiver
+      const mine = [sender, receiver].includes(userId)
+      if (!id || !mine) return
+
+      // pending에서 제거
+      setPendingRooms((prev) => prev.filter((r) => r.chatroomId !== id))
+
+      // 목록 갱신
+      sendMessage({ action: 'getChatRooms', data: { userId } })
+    })
+
+    return () => {
+      offReceive?.()
+      offRequest?.()
+      offCreated?.()
     }
-
-    // 채팅방 목록 요청
-    sendMessage({
-      action: 'getChatRooms',
-      data: { userId },
-    })
-
-    // 채팅방 목록 수신 이벤트 구독
-    const unsubscribe = onEvent('chatRoomsList', (msg: any) => {
-      if (Array.isArray(msg.data?.rooms)) {
-        const filteredRooms = (msg.data.rooms as ChatRoom[]).filter(
-          (room) => room.status === 'accepted',
-        )
-        setChatRooms(filteredRooms as ChatRoom[])
-        setLoading(false)
-      }
-    })
-
-    return unsubscribe
-  }, [isConnected, sendMessage, onEvent])
+  }, [isConnected, onEvent, sendMessage])
 
   const handleRetry = () => {
     setError(null)
@@ -87,7 +94,11 @@ const ContainerBox = () => {
       {loading ? (
         <Button fullWidth loading loadingPosition="start" />
       ) : chatRooms.length > 0 ? (
-        <ChatContainer chatRooms={chatRooms} />
+        <ChatContainer
+          chatRooms={chatRooms}
+          pendingRooms={pendingRooms}
+          setPendingRooms={setPendingRooms}
+        />
       ) : (
         <NoChat />
       )}
