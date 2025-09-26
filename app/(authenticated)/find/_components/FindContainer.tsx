@@ -86,7 +86,7 @@ const FindContainer = () => {
 
   return (
     <>
-      <Container className="pt-8 pb-8 h-full">
+      <Container className="pt-8 pb-8 h-full mb-[56px]">
         <Grid container spacing={2} className="h-full">
           {BUTTONS.map((button) => (
             <Grid key={button.id} size={button.gridSize}>
