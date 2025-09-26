@@ -189,7 +189,7 @@ const UniversalToast = (props: UniversalToastProps) => {
   const getToastStyles = () => {
     switch (type) {
       case 'chat-request':
-        return 'bg-white/90 border-hh-primary border-2 w-[80%]'
+        return 'bg-white/90 border-hh-primary border-2 min-w-[320px] max-w-[400px]'
       case 'ai-match':
         return 'bg-white border border-gray-200 min-w-[320px] max-w-[400px]'
       case 'notification':
