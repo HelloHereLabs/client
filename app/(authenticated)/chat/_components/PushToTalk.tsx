@@ -22,7 +22,7 @@ const PushToTalk = ({ type, target, userId, chatroomId }: PushToTalkProps) => {
   }
 
   return (
-    <div className="w-full h-full py-70 flex flex-col items-center gap-40">
+    <div className="w-full h-full py-20 flex flex-col justify-center items-center gap-10">
       {status === 'waiting' ? (
         <>
           <div className="font-bold">대화를 시작해보세요</div>

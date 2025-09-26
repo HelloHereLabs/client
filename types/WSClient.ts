@@ -20,6 +20,7 @@ export interface ChatRoom {
   lastMessage?: string
   updateAt: number
   lastActivity: number
+  status?: string
 }
 
 export interface ChatMessage {

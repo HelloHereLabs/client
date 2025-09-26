@@ -42,7 +42,10 @@ const ContainerBox = () => {
     // 채팅방 목록 수신 이벤트 구독
     const unsubscribe = onEvent('chatRoomsList', (msg: any) => {
       if (Array.isArray(msg.data?.rooms)) {
-        setChatRooms(msg.data.rooms as ChatRoom[])
+        const filteredRooms = (msg.data.rooms as ChatRoom[]).filter(
+          (room) => room.status === 'accepted',
+        )
+        setChatRooms(filteredRooms as ChatRoom[])
         setLoading(false)
       }
     })
