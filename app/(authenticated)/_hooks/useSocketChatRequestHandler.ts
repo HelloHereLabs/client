@@ -19,7 +19,7 @@ interface ChatMessage {
 
 interface ToastData {
   senderName: string
-  senderId?: string
+  sender?: string
   chatId?: string
 }
 
@@ -35,7 +35,7 @@ interface ToastData {
  * - 메모리 누수 방지를 위한 자동 정리
  */
 export const useSocketChatRequestHandler = () => {
-  const { socket, isConnected } = useWebSocket()
+  const { socket, isConnected, sendMessage } = useWebSocket()
   const router = useRouter()
   const [toastData, setToastData] = useState<ToastData | null>(null)
   const [isToastVisible, setIsToastVisible] = useState(false)
@@ -63,7 +63,7 @@ export const useSocketChatRequestHandler = () => {
         // 토스트 데이터 설정
         const newToastData: ToastData = {
           senderName: senderNickname,
-          senderId: message.senderId,
+          sender: message.sender,
           chatId: message.chatRoomId,
         }
 
@@ -106,17 +106,43 @@ export const useSocketChatRequestHandler = () => {
 
   // 채팅 요청 수락 핸들러
   const handleAcceptChat = useCallback(() => {
-    if (toastData?.senderId) {
-      router.push(`/chat?userId=${toastData.senderId}`)
+    if (toastData?.sender) {
+      const receiver = localStorage.getItem('user-id')
+      // 소켓으로 메세지 발송 - 채팅 요청 수락 알림
+      if (sendMessage) {
+        const messagePayload = {
+          action: 'acceptNewChat',
+          data: {
+            sender: toastData.sender,
+            receiver,
+            chatRoomId: toastData.chatId,
+          },
+        }
+
+        sendMessage(messagePayload)
+        router.push(`/chat`)
+      }
       setIsToastVisible(false)
     }
-  }, [toastData?.senderId, router])
+  }, [toastData?.sender, toastData?.chatId, sendMessage, router])
 
   // 채팅 요청 거절 핸들러
   const handleRejectChat = useCallback(() => {
+    // 소켓으로 메세지 발송 - 채팅 요청 거절 알림
+    if (toastData?.sender && sendMessage) {
+      const receiver = localStorage.getItem('user-id')
+      const messagePayload = {
+        action: 'rejectNewChat',
+        data: {
+          sender: toastData.sender,
+          receiver,
+          chatRoomId: toastData.chatId,
+        },
+      }
+      sendMessage(messagePayload)
+    }
     setIsToastVisible(false)
-    // TODO: 서버에 거절 알림 전송
-  }, [])
+  }, [toastData, sendMessage])
 
   // 소켓 이벤트 리스너 등록/해제
   useEffect(() => {
