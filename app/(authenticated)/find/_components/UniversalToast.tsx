@@ -67,7 +67,7 @@ const UniversalToast = (props: UniversalToastProps) => {
 
   // 자동 닫기 기능
   useEffect(() => {
-    if (isVisible && autoClose) {
+    if (isVisible && autoClose && type !== 'ai-match') {
       const timer = setTimeout(() => {
         onClose()
       }, autoCloseDelay)
