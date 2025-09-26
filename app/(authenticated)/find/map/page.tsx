@@ -227,7 +227,6 @@ const MapPage = () => {
             const senderId = localStorage.getItem('user-id') || ''
             handleStartChat(senderId, aiMatchResult.userId)
           }}
-          autoClose={false}
         />
       )}
 
@@ -239,8 +238,6 @@ const MapPage = () => {
           title={aiMatchResult.title}
           message={aiMatchResult.message}
           onClose={handleAIMatchToastClose}
-          autoClose={true}
-          autoCloseDelay={3000}
         />
       )}
 
