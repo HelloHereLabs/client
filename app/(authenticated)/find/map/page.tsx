@@ -174,7 +174,7 @@ const MapPage = () => {
   }
 
   return (
-    <Box className="flex flex-col h-dvh w-full">
+    <Box className="flex flex-col h-dvh w-full mb-[56px]">
       {/* 위치 로딩 스낵바 */}
       <LocationLoadingSnackbar isVisible={isLocationLoading} />
 
