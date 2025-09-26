@@ -39,3 +39,10 @@ export interface ChatEvent<T = any> {
   action: string
   data?: T
 }
+
+export interface ReceiveNewChat {
+  chatroomId: string
+  receiver: string
+  sender: string
+  senderNickname: string
+}
