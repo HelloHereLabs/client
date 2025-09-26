@@ -25,12 +25,16 @@ const ContainerBox = () => {
 
   // 채팅방 목록 요청 및 수신
   useEffect(() => {
+    if (!isConnected) return
+
     const userId = getUserId()
     if (!userId) return
 
+    sendMessage({ action: 'getChatRooms', data: { userId } })
+
     const pushPending = (e: ReceiveNewChat) =>
       setPendingRooms((prev) => {
-        const id = e.chatroomId ?? e.chatroomId
+        const id = e.chatroomId
         if (!id) return prev
         if (prev.some((r) => r.chatroomId === id)) return prev
         return [...prev, { ...e, chatroomId: id }]
@@ -40,9 +44,9 @@ const ContainerBox = () => {
     const offRequest = onEvent('requestNewChat', pushPending)
 
     const offCreated = onEvent('roomCreated', (e: ReceiveNewChat) => {
-      const id = e.chatroomId ?? e.chatroomId
-      const sender = e.sender ?? e.sender
-      const receiver = e.receiver ?? e.receiver
+      const id = e.chatroomId
+      const sender = e.sender
+      const receiver = e.receiver
       const mine = [sender, receiver].includes(userId)
       if (!id || !mine) return
 
@@ -53,10 +57,23 @@ const ContainerBox = () => {
       sendMessage({ action: 'getChatRooms', data: { userId } })
     })
 
+    const offList = onEvent('chatRoomsList', (msg: any) => {
+      if (Array.isArray(msg.data?.rooms)) {
+        const filtered = (msg.data.rooms as ChatRoom[]).filter(
+          (r) => r.status === 'accepted',
+        )
+        setChatRooms(filtered)
+        setLoading(false)
+      }
+    })
+
+    setLoading(false)
+
     return () => {
       offReceive?.()
       offRequest?.()
       offCreated?.()
+      offList?.()
     }
   }, [isConnected, onEvent, sendMessage])
 
