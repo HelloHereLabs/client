@@ -11,7 +11,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import ChatInput from './ChatInput'
 import MyChat from './MyChat'
 import UrChat from './UrChat'
-import { useSocketChatRequestHandler } from '../../_hooks/useSocketChatRequestHandler'
+
 import PushToTalk from './PushToTalk'
 
 interface ChatRoomsProps {
@@ -19,8 +19,6 @@ interface ChatRoomsProps {
 }
 
 const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
-  const { toastComponent } = useSocketChatRequestHandler()
-
   const { onEvent, sendMessage } = useWebSocket()
   const chatContainerRef = useRef(null)
 
@@ -30,7 +28,7 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
 
   const [target, setTarget] = useState<string | null>('')
   const [type, setType] = useState<string>('chat')
-  const [newRoom, setNewRoom] = useState<ReceiveNewChat | null>(null)
+  const [pendingRooms, setPendingRooms] = useState<ReceiveNewChat[]>([])
 
   const getTarget = () => {
     if (typeof window !== 'undefined') {
@@ -83,15 +81,20 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
       getChatHistory(chatRoomId, userId)
     })
 
-    const scribe = onEvent('receiveNewChat', (msg: ReceiveNewChat) => {
-      setNewRoom(msg)
-      return msg
-    })
-
-    scribe()
-
     return unsubscribe
   }, [chatRoomId, getChatHistory, onEvent])
+
+  // 알림 스택
+  useEffect(() => {
+    if (chatRoomId) return
+    const unsubscribe = onEvent('receiveNewChat', (e: ReceiveNewChat) => {
+      setPendingRooms((prev) => {
+        if (prev.some((r) => r.chatroomId === e.chatroomId)) return prev
+        return [...prev, e]
+      })
+    })
+    return unsubscribe
+  }, [chatRoomId, onEvent])
 
   // 메세지 보내기
   const sendMsg = () => {
@@ -140,14 +143,21 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
         )}
       </div>
       <div
-        className={`relative flex flex-col flex-1 min-h-0 items-center pb-2 bg-hh-color9 overflow-y-auto overflow-x-hidden flex-1 min-h-0 `}
+        className={`relative flex flex-col flex-1 min-h-0 items-center pb-2 bg-hh-color9 overflow-y-auto overflow-x-hidden `}
         ref={chatContainerRef}
       >
-        {!chatRoomId && newRoom ? (
-          <ChatAlert newRoom={newRoom} setNewRoom={setNewRoom} />
-        ) : (
-          ''
-        )}
+        {!chatRoomId && pendingRooms
+          ? pendingRooms.map((pendingRoom: ReceiveNewChat) => {
+              return (
+                <ChatAlert
+                  key={pendingRoom.chatroomId}
+                  pendingRoom={pendingRoom}
+                  setPendingRooms={setPendingRooms}
+                  userId={getUserId()}
+                />
+              )
+            })
+          : ''}
         {!chatRoomId ? (
           chatRooms?.map((chatRoom: ChatRoom) => {
             const handleChatRoomClick = () => {
