@@ -1,7 +1,6 @@
 'use client'
 
 import { useWebSocket } from '@/app/(authenticated)/_contexts/WebSocketContext'
-import { ChatStore } from '@/store/chatStore'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
@@ -38,7 +37,7 @@ const MapPage = () => {
   const map = useKakaoMap() // 카카오맵 인스턴스
   const { locationResult, requestPermission, isTracking } = useLocation() // 위치 컨텍스트
   // 채팅 웹소켓 컨텍스트
-  const { sendAndWait, isConnected } = useWebSocket()
+  const { sendMessage, isConnected } = useWebSocket()
 
   // 현재 위치에서 위도/경도 추출
   const currentLatitude = locationResult?.data?.latitude
@@ -143,21 +142,8 @@ const MapPage = () => {
         }
 
         // 대화요청 완료 및 생성된 채팅방 ID 수신 대기
-        const responseMsg = await sendAndWait(
-          chatRequestPayload,
-          (msg) => msg?.action === 'roomCreated',
-        )
-
-        if (responseMsg) {
-          const roomId = responseMsg.data.id
-          ChatStore.getState().setChatRoomId(roomId)
-          router.push(`/chat`)
-        } else {
-          console.error(
-            '❌ [useNearbyUsersMarkers] Failed to send chat request',
-          )
-          // TODO: 전송 실패 피드백
-        }
+        sendMessage(chatRequestPayload)
+        router.push(`/chat`)
       } catch (error) {
         console.error(
           '❌ [useNearbyUsersMarkers] Error sending chat request:',
@@ -166,7 +152,7 @@ const MapPage = () => {
         // TODO: 에러 처리
       }
     },
-    [sendAndWait, isConnected, router],
+    [sendMessage, isConnected, router],
   )
 
   const handleBack = () => {
