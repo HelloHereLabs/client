@@ -31,11 +31,7 @@ const AppNavigation = () => {
   const [location, setLocation] = useState(pathname)
 
   useEffect(() => {
-    if (['/quest', '/my'].includes(pathname)) {
-      alert('준비중인 서비스입니다.')
-    } else {
-      setLocation(getMatchedNavValue(pathname))
-    }
+    setLocation(getMatchedNavValue(pathname))
   }, [pathname])
 
   return (
@@ -54,6 +50,10 @@ const AppNavigation = () => {
       <BottomNavigation
         value={location}
         onChange={(event, newValue) => {
+          if (['/quest', '/my'].includes(newValue)) {
+            alert('준비중인 서비스입니다.')
+            return
+          }
           setLocation(newValue)
           if (newValue === '/exit') {
             // 로그아웃 확인 모달 처리
