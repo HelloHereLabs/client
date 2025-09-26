@@ -4,7 +4,6 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import ChatIcon from '@mui/icons-material/Chat'
 import CloseIcon from '@mui/icons-material/Close'
 import Image from 'next/image'
-import { useEffect } from 'react'
 
 export type ToastType = 'chat-request' | 'ai-match' | 'notification'
 
@@ -13,8 +12,6 @@ interface BaseToastProps {
   type: ToastType
   onClose: () => void
   onClick?: () => void
-  autoClose?: boolean
-  autoCloseDelay?: number
 }
 
 interface ChatRequestToastProps extends BaseToastProps {
@@ -56,25 +53,7 @@ type UniversalToastProps =
  * - notification: 일반 알림
  */
 const UniversalToast = (props: UniversalToastProps) => {
-  const {
-    isVisible,
-    type,
-    onClose,
-    onClick,
-    autoClose = true,
-    autoCloseDelay = 5000,
-  } = props
-
-  // 자동 닫기 기능
-  useEffect(() => {
-    if (isVisible && autoClose && type !== 'ai-match') {
-      const timer = setTimeout(() => {
-        onClose()
-      }, autoCloseDelay)
-
-      return () => clearTimeout(timer)
-    }
-  }, [isVisible, onClose, autoClose, autoCloseDelay])
+  const { isVisible, type, onClose, onClick } = props
 
   if (!isVisible) return null
 
