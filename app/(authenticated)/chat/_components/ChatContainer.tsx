@@ -29,7 +29,7 @@ const ChatContainer = ({ chatRooms }: ChatRoomsProps) => {
   const [inputValue, setInputValue] = useState<string>('')
 
   const [target, setTarget] = useState<string | null>('')
-  const [type, setType] = useState<string>('')
+  const [type, setType] = useState<string>('chat')
 
   const getTarget = () => {
     if (typeof window !== 'undefined') {
