@@ -307,6 +307,7 @@ const PurposeBox = ({ setter, onPurposeSelect, userData }: PurposeBoxProps) => {
     },
     onSuccess: (data) => {
       console.log('User data saved:', data)
+      localStorage.setItem('target', data.language)
     },
     onError: (error) => {
       console.error('Error saving user data:', error)
