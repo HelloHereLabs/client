@@ -57,8 +57,8 @@ export const useSocketChatRequestHandler = () => {
         console.log('New chat message received:', message)
 
         // senderId로 사용자 정보 조회
-        const senderId = message.senderId
-        const response = await axiosInstance.get(`api/users/${senderId}`)
+        const sender = message.sender
+        const response = await axiosInstance.get(`api/users/${sender}`)
         const senderNickname = response.data.nickname || '사용자'
         // 토스트 데이터 설정
         const newToastData: ToastData = {
