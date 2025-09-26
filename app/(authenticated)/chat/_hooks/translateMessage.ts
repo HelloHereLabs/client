@@ -1,27 +1,25 @@
+import axiosInstance from '@/lib/axiosInstance'
+
+type TranslateResponse = { translatedText: string }
+
 const translateMessage = async (
   type: string,
   text: string,
   userId: string | null,
   chatroomId: string,
   targetLanguage?: string | null,
-) => {
-  const res = await fetch(
-    'https://qm81q0oz8a.execute-api.us-west-1.amazonaws.com/test/api/translation/translate',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, text, userId, chatroomId, targetLanguage }),
-    },
-  )
-  if (!res.ok) {
-    const err = await res.text().catch(() => '')
-    console.error('translate api error:', res.status, err)
-    throw new Error('❌translate failed')
-  }
-  const data = await res.json()
+): Promise<string> => {
+  try {
+    const { data } = await axiosInstance.post<TranslateResponse>(
+      '/api/translation/translate',
+      { type, text, userId, chatroomId, targetLanguage },
+    )
+    return data.translatedText
+  } catch (err) {
+    console.error('translate api error:', err)
 
-  const translate = data.translatedText as string
-  return translate
+    return text
+  }
 }
 
 export default translateMessage
